@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dolomity 2026</title>
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #FFFFFF;
+      --bg-alt: #F9FAFB;
+      --text: #111827;
+      --text2: #6B7280;
+      --border: #E5E7EB;
+      --accent: #2563EB;
+      --good: #10B981;
+      --ok: #F59E0B;
+      --bad: #EF4444;
+      --neutral: #9CA3AF;
+      --radius: 6px;
+      --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+      --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+
+    html {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg-alt);
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body { min-height: 100dvh; }
+
+    /* ---- Progress ---- */
+    .progress {
+      position: fixed; top: 0; left: 0; height: 2px;
+      background: var(--accent); z-index: 200;
+      transition: width 0.3s ease; pointer-events: none;
+    }
+    .progress.done { opacity: 0; transition: width 0.2s ease, opacity 0.4s ease 0.2s; }
+
+    /* ---- Header ---- */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-top {
+      display: flex; align-items: center;
+      justify-content: space-between; padding: 14px 16px 0;
+    }
+    .title {
+      font-size: 18px; font-weight: 600;
+      letter-spacing: -0.025em; color: var(--text);
+    }
+    .refresh-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text2);
+      transition: border-color 0.15s, color 0.15s; flex-shrink: 0;
+    }
+    .refresh-btn:hover { border-color: var(--text); color: var(--text); }
+    .refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- Filters ---- */
+    .filters {
+      display: flex; gap: 6px; padding: 10px 16px 12px;
+      overflow-x: auto; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .pill {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text2); font-size: 13px; font-weight: 500;
+      font-family: var(--font); cursor: pointer;
+      transition: all 0.15s; white-space: nowrap; line-height: 1.2;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .pill:hover { border-color: var(--text); color: var(--text); }
+    .pill.active {
+      background: var(--text); color: var(--bg); border-color: var(--text);
+    }
+
+    /* ---- Category shape (inline) ---- */
+    .cat-shape {
+      display: inline-block; flex-shrink: 0;
+      position: relative; top: 0.5px;
+    }
+
+    /* ---- Day picker ---- */
+    .day-picker {
+      display: flex; gap: 4px; padding: 12px 16px;
+    }
+    .dpick {
+      flex: 1; padding: 6px 2px 4px;
+      border-radius: var(--radius); border: 1px solid var(--border);
+      background: var(--bg); text-align: center; cursor: pointer;
+      font-family: var(--font); transition: all 0.15s;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .dpick:hover { border-color: var(--text); }
+    .dpick.active {
+      background: var(--text); border-color: var(--text);
+    }
+    .dpick-name {
+      font-size: 10px; font-weight: 500; color: var(--text2); line-height: 1;
+    }
+    .dpick-num {
+      font-size: 13px; font-weight: 600; color: var(--text); line-height: 1;
+    }
+    .dpick.active .dpick-name { color: rgba(255,255,255,0.6); }
+    .dpick.active .dpick-num { color: #fff; }
+    .dpick-bar {
+      width: 16px; height: 3px; border-radius: 2px; margin-top: 1px;
+    }
+
+    /* ---- Legend ---- */
+    .legend {
+      display: flex; gap: 12px; padding: 0 16px 4px;
+      font-size: 10px; color: var(--text2); font-weight: 500;
+      align-items: center;
+    }
+    .legend-item { display: flex; align-items: center; gap: 3px; }
+    .legend-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ---- Map ---- */
+    .map-wrap { padding: 12px 16px 0; }
+    .map-container {
+      height: 240px; border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      overflow: hidden; z-index: 0;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius) !important;
+      box-shadow: var(--shadow) !important; padding: 0 !important;
+      font-family: var(--font) !important;
+    }
+    .leaflet-popup-content {
+      margin: 10px 14px !important; font-size: 13px !important;
+      line-height: 1.5 !important; color: var(--text) !important;
+    }
+    .leaflet-popup-tip { box-shadow: none !important; }
+    .leaflet-container { font-family: var(--font) !important; }
+    .popup-name {
+      font-weight: 600; font-size: 13px;
+      letter-spacing: -0.025em; margin-bottom: 4px;
+    }
+    .popup-weather {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--text2); font-size: 12px;
+    }
+    .popup-weather svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .popup-temp { font-weight: 600; color: var(--text); }
+    .popup-precip { color: var(--accent); font-weight: 500; }
+
+    /* ---- Grid ---- */
+    .grid {
+      display: grid; grid-template-columns: 1fr;
+      gap: 10px; padding: 12px 16px 32px;
+    }
+
+    /* ---- Card ---- */
+    .card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 12px 12px;
+      box-shadow: var(--shadow); transition: border-color 0.15s;
+    }
+    .card-head {
+      display: flex; align-items: baseline;
+      justify-content: space-between; gap: 8px; margin-bottom: 14px;
+    }
+    .card-name {
+      font-size: 14px; font-weight: 600; letter-spacing: -0.025em;
+      color: var(--text); line-height: 1.3;
+      display: flex; align-items: center; gap: 6px;
+      min-width: 0;
+    }
+    .card-name-text {
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-elev {
+      font-size: 11px; font-weight: 500; color: var(--text2);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .card-error-msg {
+      font-size: 12px; color: var(--text2);
+      padding: 16px 0; text-align: center;
+    }
+
+    /* ---- Card: day view ---- */
+    .card-day {
+      border-left: 3px solid var(--neutral);
+    }
+    .card-day .card-head { margin-bottom: 10px; }
+    .card-day-body {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .icon-lg { color: var(--text2); flex-shrink: 0; }
+    .icon-lg svg { width: 28px; height: 28px; }
+    .card-day-info { flex: 1; min-width: 0; }
+    .card-day-temp {
+      font-size: 16px; font-weight: 600; color: var(--text);
+    }
+    .card-day-lo { font-weight: 400; color: var(--text2); }
+    .card-day-desc {
+      display: block; font-size: 12px; color: var(--text2); margin-top: 1px;
+    }
+    .card-day-precip {
+      font-size: 12px; font-weight: 500; color: var(--accent);
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ---- Forecast (week view) ---- */
+    .forecast {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+    }
+    .day {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 5px; padding: 6px 0; border-radius: var(--radius);
+    }
+    .day.today { background: var(--bg-alt); }
+    .day-name {
+      font-size: 11px; font-weight: 500; color: var(--text2); line-height: 1;
+    }
+    .day.today .day-name { color: var(--accent); font-weight: 600; }
+    .day-icon {
+      width: 22px; height: 22px; color: var(--text2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .day-icon svg { width: 20px; height: 20px; }
+    .day-high {
+      font-size: 14px; font-weight: 600; color: var(--text); line-height: 1;
+    }
+    .day-low {
+      font-size: 11px; font-weight: 400; color: var(--text2); line-height: 1;
+    }
+    .day-precip {
+      font-size: 10px; font-weight: 500; color: var(--accent);
+      line-height: 1; min-height: 12px;
+    }
+
+    /* ---- Skeleton ---- */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skel {
+      background: linear-gradient(90deg, var(--border) 25%, #F3F4F6 50%, var(--border) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite;
+      border-radius: 4px;
+    }
+    .skel-name { height: 14px; width: 65%; }
+    .skel-elev { height: 11px; width: 40px; }
+    .skel-icon { height: 20px; width: 20px; border-radius: 50%; }
+    .skel-temp { height: 13px; width: 24px; }
+    .skel-temp-s { height: 10px; width: 20px; }
+    .card.skeleton .forecast { margin-top: 14px; }
+    .card.skeleton .day { gap: 6px; }
+
+    /* ---- Footer ---- */
+    .footer {
+      text-align: center; padding: 0 16px 32px;
+      font-size: 11px; color: var(--text2);
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+
+    /* ---- Responsive ---- */
+    @media (min-width: 540px) {
+      .map-wrap { padding: 16px 20px 0; }
+      .map-container { height: 300px; }
+      .day-picker { padding: 12px 20px; }
+      .legend { padding: 0 20px 4px; }
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 20px 40px; }
+      .header-top { padding: 16px 20px 0; }
+      .filters { padding: 10px 20px 14px; }
+      .footer { padding: 0 20px 40px; }
+    }
+
+    @media (min-width: 900px) {
+      .map-wrap { padding: 20px 24px 0; max-width: 1100px; margin: 0 auto; }
+      .map-container { height: 360px; }
+      .day-picker { padding: 12px 24px; max-width: 1100px; margin: 0 auto; }
+      .legend { padding: 0 24px 4px; max-width: 1100px; margin: 0 auto; }
+      .grid {
+        grid-template-columns: repeat(3, 1fr); gap: 14px;
+        max-width: 1100px; margin: 0 auto; padding: 12px 24px 48px;
+      }
+      .header-top { padding: 16px 24px 0; }
+      .filters { padding: 10px 24px 14px; }
+      .card { padding: 16px 14px 14px; }
+      .card-name { font-size: 15px; }
+      .footer { padding: 0 24px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress" id="progress" style="width:0"></div>
+
+<header class="header">
+  <div class="header-top">
+    <h1 class="title">Dolomity 2026</h1>
+    <button class="refresh-btn" id="refreshBtn" title="Odswiez dane">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+    </button>
+  </div>
+  <nav class="filters" id="filters"></nav>
+</header>
+
+<main>
+  <div class="map-wrap">
+    <div class="map-container" id="map"></div>
+  </div>
+  <div class="day-picker" id="dayPicker"></div>
+  <div class="legend" id="legend"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer class="footer">
+  <span id="updated"></span>
+  <span>Open-Meteo.com</span>
+</footer>
+
+<script>
+const LOCATIONS = [
+  { name: 'SnowLake Suite — Alleghe', lat: 46.4073, lon: 12.0240, cat: 'stay' },
+  { name: 'Canazei', lat: 46.4767, lon: 11.7706, cat: 'stay' },
+
+  { name: 'Passo Giau', lat: 46.4831, lon: 12.0542, cat: 'peak' },
+  { name: 'Seceda', lat: 46.5981, lon: 11.7242, cat: 'peak' },
+  { name: 'Sassolungo / Langkofel', lat: 46.5247, lon: 11.7353, cat: 'peak' },
+  { name: 'Forcella Sassolungo', lat: 46.5090, lon: 11.7559, cat: 'peak' },
+  { name: 'Cima Pisciadù', lat: 46.5314, lon: 11.8246, cat: 'peak' },
+  { name: 'Lagazuoi', lat: 46.5297, lon: 12.0030, cat: 'peak' },
+  { name: 'Forcella Travenanzes', lat: 46.5309, lon: 12.0200, cat: 'peak' },
+  { name: 'Tofana di Rozes', lat: 46.5371, lon: 12.0518, cat: 'peak' },
+  { name: 'Cadini di Misurina', lat: 46.5793, lon: 12.2872, cat: 'peak' },
+  { name: 'Tre Cime di Lavaredo', lat: 46.6187, lon: 12.3028, cat: 'peak' },
+  { name: 'Paternkofel', lat: 46.6253, lon: 12.3153, cat: 'peak' },
+  { name: 'Monte Pelmo', lat: 46.4206, lon: 12.1346, cat: 'peak' },
+
+  { name: 'Karersee / Lago di Carezza', lat: 46.4092, lon: 11.5751, cat: 'lake' },
+  { name: 'Lago Lagazuoi', lat: 46.5536, lon: 12.0056, cat: 'lake' },
+  { name: 'Lago di Sorapis', lat: 46.5561, lon: 12.2046, cat: 'lake' },
+  { name: 'Pragser Wildsee / Lago di Braies', lat: 46.6943, lon: 12.0854, cat: 'lake' },
+
+  { name: 'Seiser Alm / Alpe di Siusi', lat: 46.5423, lon: 11.6169, cat: 'valley' },
+  { name: 'Val di Funes', lat: 46.6395, lon: 11.6742, cat: 'valley' },
+  { name: 'Geisleralm', lat: 46.6210, lon: 11.7495, cat: 'valley' },
+  { name: 'Vallunga / Langental', lat: 46.5647, lon: 11.7775, cat: 'valley' },
+  { name: 'Cortina d\'Ampezzo', lat: 46.5378, lon: 12.1359, cat: 'valley' },
+];
+
+const CATS = {
+  all: 'Wszystko',
+  stay: 'Noclegi',
+  peak: 'Szczyty',
+  lake: 'Jeziora',
+  valley: 'Doliny',
+};
+
+const DAY_NAMES = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
+
+const WEATHER_DESC = {
+  0:'Bezchmurnie',1:'Prawie bezchmurnie',2:'Częściowe zachmurzenie',
+  3:'Pochmurno',45:'Mgła',48:'Szadź',
+  51:'Lekka mżawka',53:'Mżawka',55:'Gęsta mżawka',
+  56:'Marznąca mżawka',57:'Gęsta marznąca mżawka',
+  61:'Lekki deszcz',63:'Deszcz',65:'Silny deszcz',
+  66:'Marznący deszcz',67:'Silny marznący deszcz',
+  71:'Lekki śnieg',73:'Śnieg',75:'Silny śnieg',77:'Ziarna śniegu',
+  80:'Przelotny deszcz',81:'Przelotne opady',82:'Ulewa',
+  85:'Przelotny śnieg',86:'Silny przelotny śnieg',
+  95:'Burza',96:'Burza z gradem',99:'Silna burza z gradem',
+};
+
+/* ---- SVG Icons (weather) ---- */
+const IC = {
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+  sunCloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M4.93 4.93l1.41 1.41M20 12h2M19.07 4.93l-1.41 1.41M15.95 12.65a4 4 0 0 0-5.93-4.13"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+  fog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 17H7M17 21H9"/></svg>',
+  rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M16 14v6M8 14v6M12 16v6"/></svg>',
+  snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 14.9A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.24"/><path d="M8 15h.01M8 19h.01M12 17h.01M12 21h.01M16 15h.01M16 19h.01"/></svg>',
+  thunder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.33A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.97"/><path d="m13 12-3 5h4l-3 5"/></svg>',
+};
+
+function weatherIcon(code) {
+  if (code === 0) return IC.sun;
+  if (code <= 2) return IC.sunCloud;
+  if (code === 3) return IC.cloud;
+  if (code <= 48) return IC.fog;
+  if (code <= 67) return IC.rain;
+  if (code <= 77) return IC.snow;
+  if (code <= 82) return IC.rain;
+  if (code <= 86) return IC.snow;
+  return IC.thunder;
+}
+
+/* ---- Shapes ---- */
+const SHAPE_SM = {
+  stay:   '<rect x="1" y="1" width="6" height="6" rx="1.5"/>',
+  peak:   '<polygon points="4,0.5 7.5,7.5 0.5,7.5"/>',
+  lake:   '<circle cx="4" cy="4" r="3.5"/>',
+  valley: '<polygon points="4,0.5 7.5,4 4,7.5 0.5,4"/>',
+};
+const SHAPE_LG = {
+  stay:   '<rect x="3" y="3" width="14" height="14" rx="3"/>',
+  peak:   '<polygon points="10,2 18,17 2,17"/>',
+  lake:   '<circle cx="10" cy="10" r="7.5"/>',
+  valley: '<polygon points="10,2 18,10 10,18 2,10"/>',
+};
+
+function shapeSvg(cat, fill, size) {
+  if (size === 'lg') return `<svg width="20" height="20" viewBox="0 0 20 20" fill="${fill}" stroke="#fff" stroke-width="2">${SHAPE_LG[cat]}</svg>`;
+  return `<svg width="8" height="8" viewBox="0 0 8 8" fill="${fill}" class="cat-shape">${SHAPE_SM[cat]}</svg>`;
+}
+
+/* ---- Weather quality ---- */
+function wScore(code, prob) {
+  let s = 100;
+  if (code === 0) s -= 0;
+  else if (code <= 2) s -= 15;
+  else if (code === 3) s -= 30;
+  else if (code <= 48) s -= 40;
+  else if (code <= 57) s -= 60;
+  else if (code <= 67) s -= 75;
+  else if (code <= 77) s -= 80;
+  else if (code <= 82) s -= 75;
+  else if (code <= 86) s -= 80;
+  else s -= 90;
+  s -= prob * 0.2;
+  return Math.max(0, Math.min(100, s));
+}
+
+function sColor(score) {
+  if (score >= 65) return 'var(--good)';
+  if (score >= 35) return 'var(--ok)';
+  return 'var(--bad)';
+}
+function sColorRaw(score) {
+  if (score >= 65) return '#10B981';
+  if (score >= 35) return '#F59E0B';
+  return '#EF4444';
+}
+
+/* ---- State ---- */
+const CACHE_KEY = 'dol26w';
+const CACHE_TTL = 30 * 60 * 1000;
+let weatherData = null;
+let cacheTime = null;
+let activeFilter = 'all';
+let selectedDay = null;
+let map, markers = [];
+
+const $ = id => document.getElementById(id);
+const progress = $('progress');
+const grid = $('grid');
+const filtersEl = $('filters');
+const refreshBtn = $('refreshBtn');
+const updatedEl = $('updated');
+const dayPickerEl = $('dayPicker');
+const legendEl = $('legend');
+
+/* ---- Cache ---- */
+function getCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const c = JSON.parse(raw);
+    if (Date.now() - c.ts > CACHE_TTL) return null;
+    const today = todayStr();
+    if (c.data[0] && !c.data[0].daily.time.includes(today)) return null;
+    return c;
+  } catch { return null; }
+}
+
+function setCache(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
+}
+
+function todayStr() {
+  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+}
+
+function todayIdx() {
+  if (!weatherData || !weatherData[0]) return 0;
+  const idx = weatherData[0].daily.time.indexOf(todayStr());
+  return idx >= 0 ? idx : 0;
+}
+
+function dayName(dateStr) {
+  const p = dateStr.split('-');
+  return DAY_NAMES[new Date(Date.UTC(+p[0], +p[1]-1, +p[2])).getUTCDay()];
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function locScore(locIdx, dayIdx) {
+  const d = weatherData[locIdx];
+  if (!d) return -1;
+  return wScore(d.daily.weathercode[dayIdx], d.daily.precipitation_probability_max[dayIdx]);
+}
+
+/* ---- API ---- */
+async function fetchOne(lat, lon) {
+  const u = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+    + '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max'
+    + '&timezone=Europe/Rome&forecast_days=7';
+  const r = await fetch(u);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+async function loadWeather(force = false) {
+  if (!force) {
+    const c = getCache();
+    if (c) {
+      weatherData = c.data;
+      cacheTime = c.ts;
+      renderDayPicker();
+      render();
+      updateTimestamp();
+      updateMapAll();
+      return;
+    }
+  }
+
+  renderSkeleton();
+  refreshBtn.classList.add('spinning');
+  progress.classList.remove('done');
+  progress.style.width = '0';
+
+  let done = 0;
+  const total = LOCATIONS.length;
+  const results = await Promise.allSettled(
+    LOCATIONS.map(async loc => {
+      const data = await fetchOne(loc.lat, loc.lon);
+      done++;
+      progress.style.width = (done / total * 100) + '%';
+      return data;
+    })
+  );
+
+  weatherData = results.map(r => r.status === 'fulfilled' ? r.value : null);
+  cacheTime = Date.now();
+  setCache(weatherData);
+
+  progress.style.width = '100%';
+  setTimeout(() => progress.classList.add('done'), 200);
+  refreshBtn.classList.remove('spinning');
+
+  renderDayPicker();
+  render();
+  updateTimestamp();
+  updateMapAll();
+}
+
+/* ---- Render ---- */
+function render() {
+  if (!weatherData) return;
+  const today = todayStr();
+  const di = selectedDay !== null ? selectedDay : todayIdx();
+
+  let items = LOCATIONS.map((loc, i) => ({ ...loc, idx: i }))
+    .filter(l => activeFilter === 'all' || l.cat === activeFilter);
+
+  if (!items.length) {
+    grid.innerHTML = '<p style="text-align:center;color:var(--text2);padding:32px 0;font-size:13px">Brak lokalizacji w tej kategorii</p>';
+    return;
+  }
+
+  if (selectedDay !== null) {
+    items.sort((a, b) => locScore(b.idx, di) - locScore(a.idx, di));
+
+    grid.innerHTML = items.map(loc => {
+      const d = weatherData[loc.idx];
+      if (!d) return `<div class="card"><div class="card-head"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span></div><div class="card-error-msg">Brak danych</div></div>`;
+
+      const code = d.daily.weathercode[di];
+      const hi = Math.round(d.daily.temperature_2m_max[di]);
+      const lo = Math.round(d.daily.temperature_2m_min[di]);
+      const prob = d.daily.precipitation_probability_max[di];
+      const precip = d.daily.precipitation_sum[di];
+      const elev = Math.round(d.elevation);
+      const desc = WEATHER_DESC[code] || '';
+      const sc = wScore(code, prob);
+      const col = sColor(sc);
+
+      return `<div class="card card-day" style="border-left-color:${col}" data-cat="${loc.cat}">
+        <div class="card-head">
+          <span class="card-name">${shapeSvg(loc.cat, col, 'sm')}<span class="card-name-text">${esc(loc.name)}</span></span>
+          <span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span>
+        </div>
+        <div class="card-day-body">
+          <span class="icon-lg">${weatherIcon(code)}</span>
+          <div class="card-day-info">
+            <span class="card-day-temp">${hi}° <span class="card-day-lo">/ ${lo}°</span></span>
+            <span class="card-day-desc">${desc}</span>
+          </div>
+          ${prob > 15 ? `<span class="card-day-precip">${prob}%${precip >= 1 ? ' · ' + Math.round(precip) + 'mm' : ''}</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    grid.innerHTML = items.map(loc => {
+      const d = weatherData[loc.idx];
+      const sc = locScore(loc.idx, di);
+      const col = sc >= 0 ? sColor(sc) : 'var(--neutral)';
+
+      if (!d) return `<div class="card"><div class="card-head"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span></div><div class="card-error-msg">Brak danych</div></div>`;
+
+      const elev = Math.round(d.elevation);
+      const days = d.daily.time.map((date, i) => {
+        const isToday = date === today;
+        const prob = d.daily.precipitation_probability_max[i];
+        return `<div class="day${isToday ? ' today' : ''}">
+          <span class="day-name">${isToday ? 'Dziś' : dayName(date)}</span>
+          <span class="day-icon" title="${WEATHER_DESC[d.daily.weathercode[i]] || ''}">${weatherIcon(d.daily.weathercode[i])}</span>
+          <span class="day-high">${Math.round(d.daily.temperature_2m_max[i])}°</span>
+          <span class="day-low">${Math.round(d.daily.temperature_2m_min[i])}°</span>
+          <span class="day-precip">${prob > 20 ? prob + '%' : ''}</span>
+        </div>`;
+      }).join('');
+
+      return `<div class="card" data-cat="${loc.cat}">
+        <div class="card-head">
+          <span class="card-name">${shapeSvg(loc.cat, col, 'sm')}<span class="card-name-text">${esc(loc.name)}</span></span>
+          <span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span>
+        </div>
+        <div class="forecast">${days}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderSkeleton() {
+  let html = '';
+  for (let c = 0; c < 9; c++) {
+    let days = '';
+    for (let i = 0; i < 7; i++) {
+      days += `<div class="day"><span class="skel skel-temp-s"></span><span class="skel skel-icon"></span><span class="skel skel-temp"></span><span class="skel skel-temp-s"></span><span style="min-height:12px"></span></div>`;
+    }
+    html += `<div class="card skeleton"><div class="card-head"><span class="skel skel-name"></span><span class="skel skel-elev"></span></div><div class="forecast">${days}</div></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+/* ---- Filters ---- */
+function renderFilters() {
+  filtersEl.innerHTML = Object.entries(CATS).map(([key, label]) => {
+    const count = key === 'all' ? LOCATIONS.length : LOCATIONS.filter(l => l.cat === key).length;
+    const isActive = key === activeFilter;
+    const shape = key !== 'all'
+      ? shapeSvg(key, isActive ? '#fff' : '#6B7280', 'sm')
+      : '';
+    return `<button class="pill${isActive ? ' active' : ''}" data-cat="${key}">${shape}${label} <span style="opacity:.5">${count}</span></button>`;
+  }).join('');
+}
+
+filtersEl.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if (!btn) return;
+  activeFilter = btn.dataset.cat;
+  renderFilters();
+  render();
+  updateMapMarkers();
+});
+
+/* ---- Day picker ---- */
+function renderDayPicker() {
+  if (!weatherData || !weatherData[0]) { dayPickerEl.innerHTML = ''; return; }
+  const times = weatherData[0].daily.time;
+  const today = todayStr();
+
+  dayPickerEl.innerHTML = times.map((date, i) => {
+    const isToday = date === today;
+    const label = isToday ? 'Dziś' : dayName(date);
+    const num = parseInt(date.split('-')[2]);
+    const avg = avgDayScore(i);
+    const active = selectedDay === i;
+    return `<button class="dpick${active ? ' active' : ''}" data-day="${i}">
+      <span class="dpick-name">${label}</span>
+      <span class="dpick-num">${num}</span>
+      <span class="dpick-bar" style="background:${sColorRaw(avg)}"></span>
+    </button>`;
+  }).join('');
+
+  renderLegend();
+}
+
+function avgDayScore(dayIdx) {
+  let total = 0, n = 0;
+  LOCATIONS.forEach((loc, i) => {
+    if (activeFilter !== 'all' && loc.cat !== activeFilter) return;
+    const d = weatherData[i];
+    if (!d) return;
+    total += wScore(d.daily.weathercode[dayIdx], d.daily.precipitation_probability_max[dayIdx]);
+    n++;
+  });
+  return n ? total / n : 50;
+}
+
+function renderLegend() {
+  legendEl.innerHTML = `
+    <span class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>Dobra</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ok)"></span>Umiark.</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--bad)"></span>Slaba</span>
+    <span style="color:var(--border)">|</span>
+    <span class="legend-item">${shapeSvg('stay','var(--text2)','sm')}Nocleg</span>
+    <span class="legend-item">${shapeSvg('peak','var(--text2)','sm')}Szczyt</span>
+    <span class="legend-item">${shapeSvg('lake','var(--text2)','sm')}Jezioro</span>
+    <span class="legend-item">${shapeSvg('valley','var(--text2)','sm')}Dolina</span>
+  `;
+}
+
+dayPickerEl.addEventListener('click', e => {
+  const btn = e.target.closest('.dpick');
+  if (!btn) return;
+  const day = parseInt(btn.dataset.day);
+  selectedDay = selectedDay === day ? null : day;
+  renderDayPicker();
+  render();
+  updateMapAll();
+});
+
+/* ---- Refresh ---- */
+refreshBtn.addEventListener('click', () => loadWeather(true));
+
+/* ---- Timestamp ---- */
+function updateTimestamp() {
+  if (!cacheTime) { updatedEl.textContent = ''; return; }
+  const mins = Math.floor((Date.now() - cacheTime) / 60000);
+  updatedEl.textContent = mins < 1 ? 'Zaktualizowano teraz' : `Zaktualizowano ${mins} min temu`;
+}
+setInterval(updateTimestamp, 60000);
+setInterval(() => loadWeather(false), CACHE_TTL);
+
+/* ---- Map ---- */
+function initMap() {
+  map = L.map('map', { zoomControl: false, attributionControl: false });
+  L.control.zoom({ position: 'topright' }).addTo(map);
+  L.control.attribution({ prefix: false, position: 'bottomright' })
+    .addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OSM</a>')
+    .addTo(map);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 17, subdomains: 'abcd',
+  }).addTo(map);
+
+  LOCATIONS.forEach((loc, i) => {
+    const m = L.marker([loc.lat, loc.lon], {
+      icon: mkIcon(loc.cat, '#9CA3AF'),
+    }).addTo(map);
+    m._locIdx = i;
+    m._cat = loc.cat;
+    markers.push(m);
+  });
+
+  fitMapBounds();
+}
+
+function mkIcon(cat, color) {
+  return L.divIcon({
+    html: shapeSvg(cat, color, 'lg'),
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    popupAnchor: [0, -10],
+    className: '',
+  });
+}
+
+function fitMapBounds() {
+  const vis = markers.filter(m => activeFilter === 'all' || m._cat === activeFilter);
+  if (!vis.length) return;
+  map.fitBounds(L.featureGroup(vis).getBounds().pad(0.15));
+}
+
+function updateMapMarkers() {
+  markers.forEach(m => {
+    const show = activeFilter === 'all' || m._cat === activeFilter;
+    if (show && !map.hasLayer(m)) map.addLayer(m);
+    if (!show && map.hasLayer(m)) map.removeLayer(m);
+  });
+  fitMapBounds();
+  updateMapColors();
+}
+
+function updateMapColors() {
+  if (!weatherData) return;
+  const di = selectedDay !== null ? selectedDay : todayIdx();
+  markers.forEach(m => {
+    const sc = locScore(m._locIdx, di);
+    const col = sc >= 0 ? sColorRaw(sc) : '#9CA3AF';
+    m.setIcon(mkIcon(m._cat, col));
+  });
+}
+
+function updateMapPopups() {
+  if (!weatherData) return;
+  const di = selectedDay !== null ? selectedDay : todayIdx();
+
+  markers.forEach(m => {
+    const loc = LOCATIONS[m._locIdx];
+    const d = weatherData[m._locIdx];
+    if (!d) {
+      m.bindPopup(`<div class="popup-name">${esc(loc.name)}</div><div style="color:var(--text2);font-size:12px">Brak danych</div>`);
+      return;
+    }
+
+    const code = d.daily.weathercode[di];
+    const hi = Math.round(d.daily.temperature_2m_max[di]);
+    const lo = Math.round(d.daily.temperature_2m_min[di]);
+    const prob = d.daily.precipitation_probability_max[di];
+    const elev = Math.round(d.elevation);
+    const desc = WEATHER_DESC[code] || '';
+
+    m.bindPopup(
+      `<div class="popup-name">${esc(loc.name)}</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${elev.toLocaleString('pl-PL')} m</div>
+      <div class="popup-weather">
+        ${weatherIcon(code)}
+        <span class="popup-temp">${hi}° / ${lo}°</span>
+        <span>${desc}</span>
+      </div>
+      ${prob > 20 ? `<div class="popup-precip" style="margin-top:3px;font-size:11px">Opady: ${prob}%</div>` : ''}`,
+      { closeButton: false, offset: [0, -4] }
+    );
+  });
+}
+
+function updateMapAll() {
+  updateMapColors();
+  updateMapPopups();
+  updateMapMarkers();
+}
+
+/* ---- Init ---- */
+initMap();
+renderFilters();
+loadWeather();
+</script>
+</body>
+</html>
