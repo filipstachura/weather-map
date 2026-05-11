@@ -90,6 +90,11 @@
     .card-url-link{font-size:11px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;max-width:100%;overflow:hidden}
     .card-url-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .card-url-link:hover{text-decoration:underline}
+    .trail-meta{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:11px;color:var(--text2);margin-bottom:8px;padding:6px 0;border-top:1px solid var(--border)}
+    .trail-meta-item{display:flex;align-items:center;gap:3px;white-space:nowrap}
+    .trail-meta-item strong{color:var(--text);font-weight:600}
+    .trail-at-link{font-size:11px;color:var(--accent);text-decoration:none}
+    .trail-at-link:hover{text-decoration:underline}
     .card-error-msg{font-size:12px;color:var(--text2);padding:16px 0;text-align:center}
 
     /* Card day view */
@@ -236,9 +241,30 @@ const LOCATIONS = [
   { name: 'Geisleralm', lat: 46.6210, lon: 11.7495, cat: 'valley' },
   { name: 'Vallunga / Langental', lat: 46.5647, lon: 11.7775, cat: 'valley' },
   { name: 'Cortina d\'Ampezzo', lat: 46.5378, lon: 12.1359, cat: 'valley' },
+  { name: 'Col Raiser–Secëda–Forcella Pana', lat: 46.58478, lon: 11.74532, cat: 'trail' },
+  { name: 'Seceda–Pieralongia Hut', lat: 46.5978, lon: 11.72448, cat: 'trail' },
+  { name: 'Seceda–Pieralongia–Firenze–Troier', lat: 46.59792, lon: 11.72436, cat: 'trail' },
+  { name: 'Tre Cime di Lavaredo–Laghi dei Piani', lat: 46.61241, lon: 12.29539, cat: 'trail' },
+  { name: 'Lake Braies Loop', lat: 46.69977, lon: 12.08526, cat: 'trail' },
+  { name: 'Alpe di Siusi–Ortisei', lat: 46.55805, lon: 11.66471, cat: 'trail' },
+  { name: 'Lagazuoi–Cinque Torri (Alta Via 1)', lat: 46.52764, lon: 12.0082, cat: 'trail' },
+  { name: 'Cadini di Misurina via Auronzo', lat: 46.61225, lon: 12.29641, cat: 'trail' },
+  { name: 'Lago di Carezza–Lago di Mezzo', lat: 46.41034, lon: 11.57584, cat: 'trail' },
 ];
 
-const CATS = { all:'Wszystko', starred:'Gwiazdki', hearted:'Serca', stay:'Noclegi', peak:'Szczyty', lake:'Jeziora', valley:'Doliny' };
+const TRAIL_META = {
+  23:{km:10.0,gain:553,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:2075,slug:'trail/italy/south-tyrol/col-raiser-seceda-forcella-pana-rifugio-firenze'},
+  24:{km:5.5,gain:322,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:996,slug:'trail/italy/south-tyrol/seceda-malga-pieralongia'},
+  25:{km:10.1,gain:570,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:1172,slug:'trail/italy/south-tyrol/seceda-malga-pieralongia-rifugio-firenze-baita-troier'},
+  26:{km:11.4,gain:597,high:2481,diff:'moderate',type:'loop',rating:4.8,reviews:984,slug:'trail/italy/veneto/tre-cime-di-lavaredo-laghi-dei-piani'},
+  27:{km:3.9,gain:189,high:1582,diff:'moderate',type:'loop',rating:4.7,reviews:2996,slug:'trail/italy/south-tyrol/lago-di-braies-pragser-wildsee'},
+  28:{km:5.5,gain:18,high:2007,diff:'moderate',type:'point to point',rating:4.7,reviews:162,slug:'trail/italy/south-tyrol/alpe-di-siusi-ortisei'},
+  29:{km:11.6,gain:522,high:2732,diff:'moderate',type:'point to point',rating:4.8,reviews:22,slug:'trail/italy/veneto/rifugio-lagazuoi-rifugio-cinque-torri'},
+  30:{km:3.5,gain:206,high:2359,diff:'moderate',type:'out & back',rating:4.8,reviews:2873,slug:'trail/italy/veneto/rifugio-auronzo-cadini-di-misurina'},
+  31:{km:4.3,gain:173,high:1684,diff:'moderate',type:'loop',rating:4.5,reviews:499,slug:'trail/italy/south-tyrol/lago-di-carezza-lago-di-mezzo'},
+};
+
+const CATS = { all:'Wszystko', starred:'Gwiazdki', hearted:'Serca', stay:'Noclegi', peak:'Szczyty', lake:'Jeziora', valley:'Doliny', trail:'Trasy' };
 const DAY_NAMES = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
 const WEATHER_DESC = {
   0:'Bezchmurnie',1:'Prawie bezchmurnie',2:'Częściowe zachmurzenie',
@@ -269,8 +295,8 @@ function weatherIcon(code){
 }
 
 /* Shapes */
-const SH_SM={stay:'<rect x="1" y="1" width="6" height="6" rx="1.5"/>',peak:'<polygon points="4,0.5 7.5,7.5 0.5,7.5"/>',lake:'<circle cx="4" cy="4" r="3.5"/>',valley:'<polygon points="4,0.5 7.5,4 4,7.5 0.5,4"/>'};
-const SH_LG={stay:'<rect x="3" y="3" width="14" height="14" rx="3"/>',peak:'<polygon points="10,2 18,17 2,17"/>',lake:'<circle cx="10" cy="10" r="7.5"/>',valley:'<polygon points="10,2 18,10 10,18 2,10"/>'};
+const SH_SM={stay:'<rect x="1" y="1" width="6" height="6" rx="1.5"/>',peak:'<polygon points="4,0.5 7.5,7.5 0.5,7.5"/>',lake:'<circle cx="4" cy="4" r="3.5"/>',valley:'<polygon points="4,0.5 7.5,4 4,7.5 0.5,4"/>',trail:'<polygon points="4,0.5 7,2 7,6 4,7.5 1,6 1,2"/>'};
+const SH_LG={stay:'<rect x="3" y="3" width="14" height="14" rx="3"/>',peak:'<polygon points="10,2 18,17 2,17"/>',lake:'<circle cx="10" cy="10" r="7.5"/>',valley:'<polygon points="10,2 18,10 10,18 2,10"/>',trail:'<polygon points="10,2 17,5.5 17,14.5 10,18 3,14.5 3,5.5"/>'};
 function shapeSvg(cat,fill,sz){
   if(sz==='lg')return`<svg width="20" height="20" viewBox="0 0 20 20" fill="${fill}" stroke="#fff" stroke-width="2">${SH_LG[cat]}</svg>`;
   return`<svg width="8" height="8" viewBox="0 0 8 8" fill="${fill}" class="cat-shape">${SH_SM[cat]}</svg>`;
@@ -363,9 +389,22 @@ function cardUrlRow(idx){
   try{display=new URL(f.url).hostname}catch{display=f.url}
   return`<a class="card-url-link" href="${esc(f.url)}" target="_blank" rel="noopener">${IC_LINK}<span>${esc(display)}</span></a>`;
 }
+function trailMetaRow(idx){
+  const t=TRAIL_META[idx];
+  if(!t)return'';
+  const typeMap={'loop':'pętla','out & back':'tam i z powrotem','point to point':'punkt-punkt'};
+  return`<div class="trail-meta">
+    <span class="trail-meta-item"><strong>${t.km} km</strong></span>
+    <span class="trail-meta-item">↑ ${t.gain} m</span>
+    <span class="trail-meta-item">▲ ${t.high} m</span>
+    <span class="trail-meta-item">${typeMap[t.type]||t.type}</span>
+    <span class="trail-meta-item">★ ${t.rating} <span style="opacity:.5">(${t.reviews})</span></span>
+    <a class="trail-at-link" href="https://www.alltrails.com/${t.slug}" target="_blank" rel="noopener">AllTrails →</a>
+  </div>`;
+}
 
 /* ---- State ---- */
-const CACHE_KEY='dol26w4';
+const CACHE_KEY='dol26w5';
 const CACHE_TTL=30*60*1000;
 let weatherData=null,cacheTime=null,activeFilter='all',selectedDay=null,map,markers=[];
 
@@ -432,6 +471,7 @@ function render(){
           <div class="card-head-right">${cardActions(loc.idx)}</div>
         </div>
         ${cardUrlRow(loc.idx)}
+        ${trailMetaRow(loc.idx)}
         <div class="card-day-body">
           <span class="score-badge" style="background:${colRaw}">${sc}</span>
           <span class="icon-lg">${weatherIcon(code)}</span>
@@ -468,6 +508,7 @@ function render(){
           <div class="card-head-right">${cardActions(loc.idx)}</div>
         </div>
         ${cardUrlRow(loc.idx)}
+        ${trailMetaRow(loc.idx)}
         <div class="forecast">${days}</div>
       </div>`;
     }).join('');
@@ -527,7 +568,8 @@ function renderLegend(){
     <span class="legend-item">${shapeSvg('stay','var(--text2)','sm')}Nocleg</span>
     <span class="legend-item">${shapeSvg('peak','var(--text2)','sm')}Szczyt</span>
     <span class="legend-item">${shapeSvg('lake','var(--text2)','sm')}Jezioro</span>
-    <span class="legend-item">${shapeSvg('valley','var(--text2)','sm')}Dolina</span>`;
+    <span class="legend-item">${shapeSvg('valley','var(--text2)','sm')}Dolina</span>
+    <span class="legend-item">${shapeSvg('trail','var(--text2)','sm')}Trasa</span>`;
 }
 dayPickerEl.addEventListener('click',e=>{const b=e.target.closest('.dpick');if(!b)return;const d=parseInt(b.dataset.day);selectedDay=selectedDay===d?null:d;renderDayPicker();render();updateMapAll()});
 
