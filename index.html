@@ -74,10 +74,22 @@
 
     /* Card */
     .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px 12px;box-shadow:var(--shadow);transition:border-color .15s}
-    .card-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px}
+    .card-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:14px}
+    .card-head-left{display:flex;align-items:baseline;gap:8px;min-width:0;flex:1}
+    .card-head-right{display:flex;align-items:center;gap:2px;flex-shrink:0}
     .card-name{font-size:14px;font-weight:600;letter-spacing:-.025em;color:var(--text);line-height:1.3;display:flex;align-items:center;gap:6px;min-width:0}
     .card-name-text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     .card-elev{font-size:11px;font-weight:500;color:var(--text2);white-space:nowrap;flex-shrink:0}
+    .card-actions{display:flex;align-items:center;gap:2px;flex-shrink:0}
+    .card-act{width:26px;height:26px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--text2);transition:all .15s;padding:0}
+    .card-act:hover{background:var(--bg-alt)}
+    .card-act svg{width:16px;height:16px}
+    .card-act.starred{color:#F59E0B}
+    .card-act.hearted{color:#EF4444}
+    .card-act.has-url{color:var(--accent)}
+    .card-url-link{font-size:11px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;max-width:100%;overflow:hidden}
+    .card-url-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .card-url-link:hover{text-decoration:underline}
     .card-error-msg{font-size:12px;color:var(--text2);padding:16px 0;text-align:center}
 
     /* Card day view */
@@ -226,7 +238,7 @@ const LOCATIONS = [
   { name: 'Cortina d\'Ampezzo', lat: 46.5378, lon: 12.1359, cat: 'valley' },
 ];
 
-const CATS = { all:'Wszystko', stay:'Noclegi', peak:'Szczyty', lake:'Jeziora', valley:'Doliny' };
+const CATS = { all:'Wszystko', starred:'Gwiazdki', hearted:'Serca', stay:'Noclegi', peak:'Szczyty', lake:'Jeziora', valley:'Doliny' };
 const DAY_NAMES = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
 const WEATHER_DESC = {
   0:'Bezchmurnie',1:'Prawie bezchmurnie',2:'Częściowe zachmurzenie',
@@ -314,6 +326,44 @@ function wScore(code,prob,wind){
 function sColor(sc){if(sc>=settings.threshGood)return'var(--good)';if(sc>=settings.threshOk)return'var(--ok)';return'var(--bad)'}
 function sColorRaw(sc){if(sc>=settings.threshGood)return'#10B981';if(sc>=settings.threshOk)return'#F59E0B';return'#EF4444'}
 
+/* ---- Favorites (star, heart, url) ---- */
+const FAV_KEY='dol26fav';
+let favs={};
+function loadFavs(){try{const r=localStorage.getItem(FAV_KEY);if(r)favs=JSON.parse(r)}catch{}}
+function saveFavs(){try{localStorage.setItem(FAV_KEY,JSON.stringify(favs))}catch{}}
+function getFav(idx){return favs[idx]||(favs[idx]={})}
+function toggleStar(idx){const f=getFav(idx);f.starred=!f.starred;saveFavs();fullRefresh()}
+function toggleHeart(idx){const f=getFav(idx);f.hearted=!f.hearted;saveFavs();fullRefresh()}
+function editUrl(idx){
+  const f=getFav(idx);
+  const cur=f.url||'';
+  const val=prompt('URL dla tej lokalizacji:',cur);
+  if(val===null)return;
+  if(val.trim()){f.url=val.trim()}else{delete f.url}
+  saveFavs();fullRefresh();
+}
+const IC_STAR_OUTLINE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+const IC_STAR_FILLED='<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+const IC_HEART_OUTLINE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0L12 5.36l-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.78L12 20.67l7.65-7.66.77-.78a5.4 5.4 0 0 0 0-7.65z"/></svg>';
+const IC_HEART_FILLED='<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0L12 5.36l-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.78L12 20.67l7.65-7.66.77-.78a5.4 5.4 0 0 0 0-7.65z"/></svg>';
+const IC_LINK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+
+function cardActions(idx){
+  const f=getFav(idx)||{};
+  return`<div class="card-actions">
+    <button class="card-act${f.url?' has-url':''}" onclick="editUrl(${idx})" title="${f.url?'Edytuj URL':'Dodaj URL'}">${IC_LINK}</button>
+    <button class="card-act${f.hearted?' hearted':''}" onclick="toggleHeart(${idx})" title="Serce">${f.hearted?IC_HEART_FILLED:IC_HEART_OUTLINE}</button>
+    <button class="card-act${f.starred?' starred':''}" onclick="toggleStar(${idx})" title="Gwiazdka">${f.starred?IC_STAR_FILLED:IC_STAR_OUTLINE}</button>
+  </div>`;
+}
+function cardUrlRow(idx){
+  const f=getFav(idx)||{};
+  if(!f.url)return'';
+  let display;
+  try{display=new URL(f.url).hostname}catch{display=f.url}
+  return`<a class="card-url-link" href="${esc(f.url)}" target="_blank" rel="noopener">${IC_LINK}<span>${esc(display)}</span></a>`;
+}
+
 /* ---- State ---- */
 const CACHE_KEY='dol26w3';
 const CACHE_TTL=30*60*1000;
@@ -359,23 +409,29 @@ function afterLoad(){renderDayPicker();render();updateTimestamp();updateMapAll()
 function render(){
   if(!weatherData)return;
   const today=todayStr(),di=activeDayIdx();
-  let items=LOCATIONS.map((l,i)=>({...l,idx:i})).filter(l=>activeFilter==='all'||l.cat===activeFilter);
+  let items=LOCATIONS.map((l,i)=>({...l,idx:i})).filter(l=>{
+    if(activeFilter==='all')return true;
+    if(activeFilter==='starred')return favs[l.idx]&&favs[l.idx].starred;
+    if(activeFilter==='hearted')return favs[l.idx]&&favs[l.idx].hearted;
+    return l.cat===activeFilter;
+  });
   if(!items.length){grid.innerHTML='<p style="text-align:center;color:var(--text2);padding:32px 0;font-size:13px">Brak lokalizacji</p>';return}
 
   if(selectedDay!==null){
     items.sort((a,b)=>locScore(b.idx,di)-locScore(a.idx,di));
     grid.innerHTML=items.map(loc=>{
       const d=weatherData[loc.idx];
-      if(!d)return`<div class="card"><div class="card-head"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span></div><div class="card-error-msg">Brak danych</div></div>`;
+      if(!d)return`<div class="card"><div class="card-head"><div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span></div><div class="card-head-right">${cardActions(loc.idx)}</div></div><div class="card-error-msg">Brak danych</div></div>`;
       const code=d.daily.weathercode[di],hi=Math.round(d.daily.temperature_2m_max[di]),lo=Math.round(d.daily.temperature_2m_min[di]);
       const prob=d.daily.precipitation_probability_max[di],precip=d.daily.precipitation_sum[di];
       const wind=locWind(loc.idx,di),elev=Math.round(d.elevation),desc=WEATHER_DESC[code]||'';
       const sc=locScore(loc.idx,di),col=sColor(sc),colRaw=sColorRaw(sc);
       return`<div class="card card-day" style="border-left-color:${col}" data-cat="${loc.cat}">
         <div class="card-head">
-          <span class="card-name">${shapeSvg(loc.cat,col,'sm')}<span class="card-name-text">${esc(loc.name)}</span></span>
-          <span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span>
+          <div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,col,'sm')}<span class="card-name-text">${esc(loc.name)}</span></span><span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span></div>
+          <div class="card-head-right">${cardActions(loc.idx)}</div>
         </div>
+        ${cardUrlRow(loc.idx)}
         <div class="card-day-body">
           <span class="score-badge" style="background:${colRaw}">${sc}</span>
           <span class="icon-lg">${weatherIcon(code)}</span>
@@ -394,7 +450,7 @@ function render(){
     grid.innerHTML=items.map(loc=>{
       const d=weatherData[loc.idx];
       const sc=locScore(loc.idx,di),col=sc>=0?sColor(sc):'var(--neutral)';
-      if(!d)return`<div class="card"><div class="card-head"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span></div><div class="card-error-msg">Brak danych</div></div>`;
+      if(!d)return`<div class="card"><div class="card-head"><div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span></div><div class="card-head-right">${cardActions(loc.idx)}</div></div><div class="card-error-msg">Brak danych</div></div>`;
       const elev=Math.round(d.elevation);
       const days=d.daily.time.map((date,i)=>{
         const isToday=date===today,prob=d.daily.precipitation_probability_max[i];
@@ -408,9 +464,10 @@ function render(){
       }).join('');
       return`<div class="card" data-cat="${loc.cat}">
         <div class="card-head">
-          <span class="card-name">${shapeSvg(loc.cat,col,'sm')}<span class="card-name-text">${esc(loc.name)}</span></span>
-          <span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span>
+          <div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,col,'sm')}<span class="card-name-text">${esc(loc.name)}</span></span><span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span></div>
+          <div class="card-head-right">${cardActions(loc.idx)}</div>
         </div>
+        ${cardUrlRow(loc.idx)}
         <div class="forecast">${days}</div>
       </div>`;
     }).join('');
@@ -426,9 +483,16 @@ function renderSkeleton(){
 /* ---- Filters ---- */
 function renderFilters(){
   filtersEl.innerHTML=Object.entries(CATS).map(([k,label])=>{
-    const cnt=k==='all'?LOCATIONS.length:LOCATIONS.filter(l=>l.cat===k).length;
+    let cnt;
+    if(k==='all')cnt=LOCATIONS.length;
+    else if(k==='starred')cnt=LOCATIONS.filter((_,i)=>favs[i]&&favs[i].starred).length;
+    else if(k==='hearted')cnt=LOCATIONS.filter((_,i)=>favs[i]&&favs[i].hearted).length;
+    else cnt=LOCATIONS.filter(l=>l.cat===k).length;
     const act=k===activeFilter;
-    const sh=k!=='all'?shapeSvg(k,act?'#fff':'#6B7280','sm'):'';
+    let sh='';
+    if(k==='starred')sh=`<span style="font-size:12px">${act?'⭐':'☆'}</span>`;
+    else if(k==='hearted')sh=`<span style="font-size:12px">${act?'❤️':'♡'}</span>`;
+    else if(k!=='all')sh=shapeSvg(k,act?'#fff':'#6B7280','sm');
     return`<button class="pill${act?' active':''}" data-cat="${k}">${sh}${label} <span style="opacity:.5">${cnt}</span></button>`;
   }).join('');
 }
@@ -447,7 +511,11 @@ function renderDayPicker(){
 }
 function avgDayScore(di){
   let t=0,n=0;
-  LOCATIONS.forEach((l,i)=>{if(activeFilter!=='all'&&l.cat!==activeFilter)return;const s=locScore(i,di);if(s>=0){t+=s;n++}});
+  LOCATIONS.forEach((l,i)=>{
+    if(activeFilter==='starred'&&!(favs[i]&&favs[i].starred))return;
+    if(activeFilter==='hearted'&&!(favs[i]&&favs[i].hearted))return;
+    if(activeFilter!=='all'&&activeFilter!=='starred'&&activeFilter!=='hearted'&&l.cat!==activeFilter)return;
+    const s=locScore(i,di);if(s>=0){t+=s;n++}});
   return n?t/n:50;
 }
 function renderLegend(){
@@ -508,8 +576,14 @@ function initMap(){
   fitMapBounds();
 }
 function mkIcon(cat,color){return L.divIcon({html:shapeSvg(cat,color,'lg'),iconSize:[20,20],iconAnchor:[10,10],popupAnchor:[0,-10],className:''})}
-function fitMapBounds(){const v=markers.filter(m=>activeFilter==='all'||m._cat===activeFilter);if(!v.length)return;map.fitBounds(L.featureGroup(v).getBounds().pad(.15))}
-function updateMapMarkers(){markers.forEach(m=>{const show=activeFilter==='all'||m._cat===activeFilter;if(show&&!map.hasLayer(m))map.addLayer(m);if(!show&&map.hasLayer(m))map.removeLayer(m)});fitMapBounds();updateMapColors()}
+function markerVisible(m){
+  if(activeFilter==='all')return true;
+  if(activeFilter==='starred')return favs[m._locIdx]&&favs[m._locIdx].starred;
+  if(activeFilter==='hearted')return favs[m._locIdx]&&favs[m._locIdx].hearted;
+  return m._cat===activeFilter;
+}
+function fitMapBounds(){const v=markers.filter(markerVisible);if(!v.length)return;map.fitBounds(L.featureGroup(v).getBounds().pad(.15))}
+function updateMapMarkers(){markers.forEach(m=>{const show=markerVisible(m);if(show&&!map.hasLayer(m))map.addLayer(m);if(!show&&map.hasLayer(m))map.removeLayer(m)});fitMapBounds();updateMapColors()}
 function updateMapColors(){if(!weatherData)return;const di=activeDayIdx();markers.forEach(m=>{const sc=locScore(m._locIdx,di);m.setIcon(mkIcon(m._cat,sc>=0?sColorRaw(sc):'#9CA3AF'))})}
 function updateMapPopups(){
   if(!weatherData)return;const di=activeDayIdx();
@@ -531,6 +605,7 @@ function updateMapPopups(){
 function updateMapAll(){updateMapColors();updateMapPopups();updateMapMarkers()}
 
 /* ---- Init ---- */
+loadFavs();
 loadSettings();
 initMap();
 renderFilters();
