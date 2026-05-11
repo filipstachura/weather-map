@@ -163,7 +163,7 @@
     .plan-pool{margin-top:14px}
     .plan-pool-title{font-size:10px;font-weight:600;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
     .plan-pool-items{display:flex;flex-wrap:wrap;gap:5px}
-    .plan-chip{padding:5px 10px;border:1px solid var(--border);border-radius:14px;background:var(--bg);font-size:11px;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
+    .plan-chip{padding:5px 10px;border:1px solid var(--border);border-radius:14px;background:var(--bg);font-size:11px;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:4px;transition:all .15s;flex-wrap:wrap}
     .plan-chip:hover{border-color:var(--text)}
 
     /* Skeleton */
@@ -895,6 +895,21 @@ function planAddToDay(locIdx,dayIdx){
 }
 function planClear(){plan={};TRIP_DAYS.forEach((_,i)=>plan[i]=[]);savePlan();renderPlanner()}
 
+function unassignedReason(locIdx){
+  let okDays=0,fullDays=0;
+  TRIP_DAYS.forEach((_,td)=>{
+    const fi=tripForecastIdx(td);
+    const ws=locScore(locIdx,fi);
+    if(ws>=settings.threshOk){
+      okDays++;
+      if((plan[td]||[]).length>=TRIP_DAYS[td].max)fullDays++;
+    }
+  });
+  if(okDays===0)return'słaba pogoda we wszystkie dni';
+  if(fullDays===okDays)return'brak wolnych slotów, ważniejsze punkty w planie';
+  return'niższy priorytet niż przypisane';
+}
+
 function renderPlanner(){
   if(!weatherData)return;
   const usedSet=assigned();
@@ -955,7 +970,8 @@ function renderPlanner(){
       const loc=LOCATIONS[li];
       const f=favs[li]||{};
       const badge=(f.hearted?'❤️ ':'')+(f.starred?'⭐ ':'');
-      h+=`<button class="plan-chip" onclick="planAddLoc(${li})">${shapeSvg(loc.cat,'var(--text2)','sm')}${badge}${esc(loc.name)}</button>`;
+      const reason=unassignedReason(li);
+      h+=`<div class="plan-chip" onclick="planAddLoc(${li})" title="${esc(reason)}">${shapeSvg(loc.cat,'var(--text2)','sm')}${badge}${esc(loc.name)}<span style="font-size:10px;color:var(--text2);margin-left:2px">— ${esc(reason)}</span></div>`;
     });
     h+=`</div></div>`;
   }
