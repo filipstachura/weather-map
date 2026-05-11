@@ -306,24 +306,41 @@ const LOCATIONS = [
 
 const TRAIL_META = {
   23:{km:10.0,gain:553,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:2075,slug:'trail/italy/south-tyrol/col-raiser-seceda-forcella-pana-rifugio-firenze',
-    pois:[[46.6020249,11.7431804],[46.6005922,11.7257836],[46.5987964,11.740451],[46.5875127,11.7583093]]},
+    includes:[3],pois:[[46.6020249,11.7431804],[46.6005922,11.7257836],[46.5987964,11.740451],[46.5875127,11.7583093]]},
   24:{km:5.5,gain:322,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:996,slug:'trail/italy/south-tyrol/seceda-malga-pieralongia',
-    pois:[[46.6005922,11.7257836],[46.5987964,11.740451]]},
+    includes:[3],pois:[[46.6005922,11.7257836],[46.5987964,11.740451]]},
   25:{km:10.1,gain:570,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:1172,slug:'trail/italy/south-tyrol/seceda-malga-pieralongia-rifugio-firenze-baita-troier',
-    pois:[[46.6005922,11.7257836],[46.5960406,11.7431999],[46.5987964,11.740451],[46.5875127,11.7583093]]},
+    includes:[3],pois:[[46.6005922,11.7257836],[46.5960406,11.7431999],[46.5987964,11.740451],[46.5875127,11.7583093]]},
   26:{km:11.4,gain:597,high:2481,diff:'moderate',type:'loop',rating:4.8,reviews:984,slug:'trail/italy/veneto/tre-cime-di-lavaredo-laghi-dei-piani',
-    pois:[[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6136422,12.3062679],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6386414,12.3154759],[46.6127831,12.2927184],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6389935,12.3082242],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]},
+    includes:[11],pois:[[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6136422,12.3062679],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6386414,12.3154759],[46.6127831,12.2927184],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6389935,12.3082242],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]},
   27:{km:3.9,gain:189,high:1582,diff:'moderate',type:'loop',rating:4.7,reviews:2996,slug:'trail/italy/south-tyrol/lago-di-braies-pragser-wildsee',
-    pois:[[46.6888277,12.0878869],[46.6937425,12.084913],[46.7119341,12.0961553],[46.6988558,12.0132509]]},
+    includes:[17],pois:[[46.6888277,12.0878869],[46.6937425,12.084913],[46.7119341,12.0961553],[46.6988558,12.0132509]]},
   28:{km:5.5,gain:18,high:2007,diff:'moderate',type:'point to point',rating:4.7,reviews:162,slug:'trail/italy/south-tyrol/alpe-di-siusi-ortisei',
-    pois:[[46.5587949,11.670502],[46.5593872,11.7055514],[46.5577857,11.7276892]]},
+    includes:[18],pois:[[46.5587949,11.670502],[46.5593872,11.7055514],[46.5577857,11.7276892]]},
   29:{km:11.6,gain:522,high:2732,diff:'moderate',type:'point to point',rating:4.8,reviews:22,slug:'trail/italy/veneto/rifugio-lagazuoi-rifugio-cinque-torri',
-    pois:[[46.5095798,12.0519072],[46.5373107,12.0587132],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5304689,12.0216286],[46.5343831,12.0554647],[46.5082178,12.054733],[46.5277379,12.0081182],[46.5323971,12.0699062]]},
+    includes:[7],pois:[[46.5095798,12.0519072],[46.5373107,12.0587132],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5304689,12.0216286],[46.5343831,12.0554647],[46.5082178,12.054733],[46.5277379,12.0081182],[46.5323971,12.0699062]]},
   30:{km:3.5,gain:206,high:2359,diff:'moderate',type:'out & back',rating:4.8,reviews:2873,slug:'trail/italy/veneto/rifugio-auronzo-cadini-di-misurina',
-    pois:[[46.6024839,12.2976006],[46.6009257,12.2954732],[46.6122047,12.2960952]]},
+    includes:[10],pois:[[46.6024839,12.2976006],[46.6009257,12.2954732],[46.6122047,12.2960952]]},
   31:{km:4.3,gain:173,high:1684,diff:'moderate',type:'loop',rating:4.5,reviews:499,slug:'trail/italy/south-tyrol/lago-di-carezza-lago-di-mezzo',
-    pois:[[46.408937,11.5736492],[46.4032417,11.5796126],[46.4101552,11.5759371]]},
+    includes:[14],pois:[[46.408937,11.5736492],[46.4032417,11.5796126],[46.4101552,11.5759371]]},
 };
+
+const MERGED_SPOTS=new Set();
+const TRAIL_GROUPS={};
+(function(){
+  const s2t={};
+  Object.entries(TRAIL_META).forEach(([idx,m])=>{
+    if(!m.includes)return;
+    m.includes.forEach(si=>{MERGED_SPOTS.add(si);if(!s2t[si])s2t[si]=[];s2t[si].push(+idx)});
+  });
+  let gid=0;
+  Object.values(s2t).forEach(trails=>{
+    let g=null;
+    trails.forEach(t=>{if(TRAIL_GROUPS[t]!==undefined)g=TRAIL_GROUPS[t]});
+    if(g===null)g=gid++;
+    trails.forEach(t=>{TRAIL_GROUPS[t]=g});
+  });
+})();
 
 const CATS = { all:'Wszystko', starred:'Gwiazdki', hearted:'Serca', stay:'Noclegi', peak:'Szczyty', lake:'Jeziora', valley:'Doliny', trail:'Trasy' };
 const DAY_NAMES = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
@@ -462,6 +479,7 @@ function trailMetaRow(idx){
     <span class="trail-meta-item">★ ${t.rating} <span style="opacity:.5">(${t.reviews})</span></span>
     <a class="trail-at-link" href="https://www.alltrails.com/${t.slug}" target="_blank" rel="noopener">AllTrails →</a>
     <a class="trail-at-link" href="#" onclick="toggleTrailPois(${idx});return false">📍 Mapa</a>
+    ${t.includes&&t.includes.length?`<span class="trail-meta-item" style="width:100%;margin-top:2px">Obejmuje: ${t.includes.map(i=>LOCATIONS[i].name).join(', ')}</span>`:''}
   </div>`;
 }
 
@@ -831,7 +849,7 @@ function planComposite(locIdx,tripDay){
   return Math.max(0,Math.round(ws-distPen));
 }
 
-function plannable(){return LOCATIONS.map((_,i)=>i).filter(i=>LOCATIONS[i].cat!=='stay')}
+function plannable(){return LOCATIONS.map((_,i)=>i).filter(i=>LOCATIONS[i].cat!=='stay'&&!MERGED_SPOTS.has(i))}
 function assigned(){const s=new Set();Object.values(plan).forEach(a=>a.forEach(i=>s.add(i)));return s}
 
 function autoGenerate(){
@@ -853,12 +871,16 @@ function autoGenerate(){
     });
     scored.sort((a,b)=>b.sc-a.sc);
     const used=assigned();
+    const usedGroups=new Set();
+    used.forEach(li=>{if(TRAIL_GROUPS[li]!==undefined)usedGroups.add(TRAIL_GROUPS[li])});
     scored.forEach(({li,td})=>{
       if(used.has(li))return;
+      if(TRAIL_GROUPS[li]!==undefined&&usedGroups.has(TRAIL_GROUPS[li]))return;
       if(!plan[td])plan[td]=[];
       if(plan[td].length>=TRIP_DAYS[td].max)return;
       plan[td].push(li);
       used.add(li);
+      if(TRAIL_GROUPS[li]!==undefined)usedGroups.add(TRAIL_GROUPS[li]);
     });
   });
   savePlan();renderPlanner();
@@ -896,6 +918,12 @@ function planAddToDay(locIdx,dayIdx){
 function planClear(){plan={};TRIP_DAYS.forEach((_,i)=>plan[i]=[]);savePlan();renderPlanner()}
 
 function unassignedReason(locIdx){
+  if(TRAIL_GROUPS[locIdx]!==undefined){
+    const gid=TRAIL_GROUPS[locIdx];
+    const usedSet=assigned();
+    const groupSibling=Object.entries(TRAIL_GROUPS).find(([ti,g])=>g===gid&&+ti!==locIdx&&usedSet.has(+ti));
+    if(groupSibling)return`alternatywa dla: ${LOCATIONS[+groupSibling[0]].name}`;
+  }
   let okDays=0,fullDays=0;
   TRIP_DAYS.forEach((_,td)=>{
     const fi=tripForecastIdx(td);
