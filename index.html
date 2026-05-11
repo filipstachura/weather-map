@@ -124,6 +124,47 @@
     .day-high{font-size:14px;font-weight:600;color:var(--text);line-height:1}
     .day-low{font-size:11px;font-weight:400;color:var(--text2);line-height:1}
     .day-precip{font-size:10px;font-weight:500;color:var(--accent);line-height:1;min-height:12px}
+    .day-score{font-size:9px;font-weight:700;line-height:1;min-height:12px}
+
+    /* Tabs */
+    .tabs{display:flex;padding:0 16px;gap:0;margin-top:8px}
+    .tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);background:none;border:none;border-bottom:2px solid var(--border);font-family:var(--font);transition:all .15s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:600}
+
+    /* Planner */
+    .planner{padding:12px 16px 32px;display:none}
+    .planner.active{display:block}
+    .planner-actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .planner-btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s}
+    .planner-btn:hover{border-color:var(--text)}
+    .planner-btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+    .planner-btn-primary:hover{opacity:.85}
+    .plan-day{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;box-shadow:var(--shadow)}
+    .plan-day-head{padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--bg-alt);border-radius:var(--radius) var(--radius) 0 0}
+    .plan-day-left{display:flex;flex-direction:column;gap:2px}
+    .plan-day-date{font-size:13px;font-weight:600;letter-spacing:-.025em}
+    .plan-day-accom{font-size:11px;color:var(--text2)}
+    .plan-day-note{font-size:10px;color:var(--accent);font-weight:500}
+    .plan-day-score{font-size:12px;font-weight:700}
+    .plan-day-items{padding:6px 8px}
+    .plan-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:4px;margin-bottom:4px;background:var(--bg-alt);transition:background .15s}
+    .plan-item:last-child{margin-bottom:0}
+    .plan-item-shape{flex-shrink:0}
+    .plan-item-info{flex:1;min-width:0}
+    .plan-item-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .plan-item-detail{font-size:10px;color:var(--text2)}
+    .plan-item-btns{display:flex;gap:2px;flex-shrink:0}
+    .plan-ibtn{width:22px;height:22px;border:1px solid var(--border);border-radius:3px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text2);padding:0;font-family:var(--font)}
+    .plan-ibtn:hover{border-color:var(--text);color:var(--text)}
+    .plan-empty{text-align:center;padding:12px 0;font-size:11px;color:var(--text2)}
+    .plan-add-btn{width:100%;padding:5px;text-align:center;border:1px dashed var(--border);border-radius:4px;background:none;color:var(--text2);font-size:11px;cursor:pointer;font-family:var(--font);margin-top:4px;transition:all .15s}
+    .plan-add-btn:hover{border-color:var(--text);color:var(--text)}
+    .plan-pool{margin-top:14px}
+    .plan-pool-title{font-size:10px;font-weight:600;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+    .plan-pool-items{display:flex;flex-wrap:wrap;gap:5px}
+    .plan-chip{padding:5px 10px;border:1px solid var(--border);border-radius:14px;background:var(--bg);font-size:11px;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
+    .plan-chip:hover{border-color:var(--text)}
 
     /* Skeleton */
     @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
@@ -159,7 +200,8 @@
       .day-picker{padding:12px 20px}.legend{padding:0 20px 4px}
       .grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:12px 20px 40px}
       .header-top{padding:16px 20px 0}.filters{padding:10px 20px 14px}
-      .footer{padding:0 20px 40px}
+      .footer{padding:0 20px 40px}.tabs{padding:0 20px}
+      .planner{padding:12px 20px 40px}
       .settings-panel{max-width:480px;border-radius:12px;max-height:85vh}
       .settings-overlay{align-items:center}
     }
@@ -172,6 +214,8 @@
       .header-top{padding:16px 24px 0}.filters{padding:10px 24px 14px}
       .card{padding:16px 14px 14px}.card-name{font-size:15px}
       .footer{padding:0 24px 48px}
+      .tabs{padding:0 24px;max-width:1100px;margin:0 auto}
+      .planner{padding:12px 24px 48px;max-width:1100px;margin:0 auto}
     }
   </style>
 </head>
@@ -196,9 +240,16 @@
 
 <main>
   <div class="map-wrap"><div class="map-container" id="map"></div></div>
-  <div class="day-picker" id="dayPicker"></div>
-  <div class="legend" id="legend"></div>
-  <div class="grid" id="grid"></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="weather">Pogoda</button>
+    <button class="tab" data-tab="planner">Planer wycieczki</button>
+  </div>
+  <div id="weatherView">
+    <div class="day-picker" id="dayPicker"></div>
+    <div class="legend" id="legend"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="planner" id="plannerView"></div>
 </main>
 
 <footer class="footer">
@@ -525,12 +576,14 @@ function render(){
       const elev=Math.round(d.elevation);
       const days=d.daily.time.map((date,i)=>{
         const isToday=date===today,prob=d.daily.precipitation_probability_max[i];
+        const dsc=locScore(loc.idx,i);
         return`<div class="day${isToday?' today':''}">
           <span class="day-name">${isToday?'Dziś':dayName(date)}</span>
           <span class="day-icon" title="${WEATHER_DESC[d.daily.weathercode[i]]||''}">${weatherIcon(d.daily.weathercode[i])}</span>
           <span class="day-high">${Math.round(d.daily.temperature_2m_max[i])}°</span>
           <span class="day-low">${Math.round(d.daily.temperature_2m_min[i])}°</span>
           <span class="day-precip">${prob>20?prob+'%':''}</span>
+          <span class="day-score" style="color:${dsc>=0?sColorRaw(dsc):'var(--neutral)'}">${dsc>=0?dsc:''}</span>
         </div>`;
       }).join('');
       return`<div class="card" data-cat="${loc.cat}">
@@ -627,7 +680,7 @@ settingsBody.addEventListener('input',e=>{
   saveSettings();fullRefresh();
 });
 
-function fullRefresh(){renderDayPicker();render();updateMapAll()}
+function fullRefresh(){renderDayPicker();render();updateMapAll();if(activeTab==='planner')renderPlanner()}
 
 settingsBtn.addEventListener('click',()=>{renderSettingsPanel();settingsOverlay.classList.add('open')});
 settingsClose.addEventListener('click',()=>settingsOverlay.classList.remove('open'));
@@ -716,6 +769,204 @@ function toggleTrailPois(locIdx){
   showTrailPois(locIdx);
 }
 
+/* ---- Tabs ---- */
+let activeTab='weather';
+const weatherView=$('weatherView'),plannerView=$('plannerView');
+document.querySelector('.tabs').addEventListener('click',e=>{
+  const t=e.target.closest('.tab');if(!t)return;
+  activeTab=t.dataset.tab;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===activeTab));
+  weatherView.style.display=activeTab==='weather'?'':'none';
+  plannerView.classList.toggle('active',activeTab==='planner');
+  if(activeTab==='planner')renderPlanner();
+});
+
+/* ---- Trip Planner ---- */
+const VERONA={lat:45.4384,lon:10.9917};
+const TRIP_DAYS=[
+  {date:'2026-05-12',accomIdx:0,note:'Przyjazd z Werony ~11:00',max:2},
+  {date:'2026-05-13',accomIdx:0,max:3},
+  {date:'2026-05-14',accomIdx:0,max:3},
+  {date:'2026-05-15',accomIdx:1,max:3},
+  {date:'2026-05-16',accomIdx:1,max:3},
+  {date:'2026-05-17',accomIdx:1,max:3},
+  {date:'2026-05-18',accomIdx:-1,note:'Powrót do Werony',max:2},
+];
+const PLAN_KEY='dol26plan';
+let plan={};
+function loadPlan(){try{const r=localStorage.getItem(PLAN_KEY);if(r)plan=JSON.parse(r)}catch{}}
+function savePlan(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(plan))}catch{}}
+
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371,rad=Math.PI/180;
+  const dLat=(lat2-lat1)*rad,dLon=(lon2-lon1)*rad;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function tripForecastIdx(tripDay){
+  if(!weatherData||!weatherData[0])return tripDay+1;
+  const idx=weatherData[0].daily.time.indexOf(TRIP_DAYS[tripDay].date);
+  return idx>=0?idx:tripDay+1;
+}
+
+function planComposite(locIdx,tripDay){
+  const td=TRIP_DAYS[tripDay];
+  const fi=tripForecastIdx(tripDay);
+  const ws=locScore(locIdx,fi);
+  if(ws<0)return 0;
+  const loc=LOCATIONS[locIdx];
+  let accomLat,accomLon;
+  if(td.accomIdx>=0){accomLat=LOCATIONS[td.accomIdx].lat;accomLon=LOCATIONS[td.accomIdx].lon}
+  else{accomLat=VERONA.lat;accomLon=VERONA.lon}
+  const dist=haversine(loc.lat,loc.lon,accomLat,accomLon);
+  let distPen=Math.min(15,Math.max(0,(dist-20)*0.3));
+  if(tripDay===0||tripDay===6){
+    const base=tripDay===0?VERONA:{lat:LOCATIONS[1].lat,lon:LOCATIONS[1].lon};
+    const dest=tripDay===0?{lat:LOCATIONS[0].lat,lon:LOCATIONS[0].lon}:VERONA;
+    const direct=haversine(base.lat,base.lon,dest.lat,dest.lon);
+    const detour=haversine(base.lat,base.lon,loc.lat,loc.lon)+haversine(loc.lat,loc.lon,dest.lat,dest.lon)-direct;
+    distPen=Math.min(25,Math.max(0,detour*0.4));
+  }
+  return Math.max(0,Math.round(ws-distPen));
+}
+
+function plannable(){return LOCATIONS.map((_,i)=>i).filter(i=>LOCATIONS[i].cat!=='stay')}
+function assigned(){const s=new Set();Object.values(plan).forEach(a=>a.forEach(i=>s.add(i)));return s}
+
+function autoGenerate(){
+  plan={};
+  TRIP_DAYS.forEach((_,i)=>plan[i]=[]);
+  const all=plannable();
+  const hearted=all.filter(i=>favs[i]&&favs[i].hearted);
+  const starred=all.filter(i=>favs[i]&&favs[i].starred&&!(favs[i]&&favs[i].hearted));
+  const rest=all.filter(i=>!favs[i]||(!favs[i].hearted&&!favs[i].starred));
+  [hearted,starred,rest].forEach(group=>{
+    const scored=[];
+    group.forEach(li=>{
+      TRIP_DAYS.forEach((_,td)=>{scored.push({li,td,sc:planComposite(li,td)})});
+    });
+    scored.sort((a,b)=>b.sc-a.sc);
+    const used=assigned();
+    scored.forEach(({li,td})=>{
+      if(used.has(li))return;
+      if(!plan[td])plan[td]=[];
+      if(plan[td].length>=TRIP_DAYS[td].max)return;
+      plan[td].push(li);
+      used.add(li);
+    });
+  });
+  savePlan();renderPlanner();
+}
+
+function planMoveLoc(locIdx,fromDay,dir){
+  const toDay=fromDay+dir;
+  if(toDay<0||toDay>=TRIP_DAYS.length)return;
+  if(!plan[toDay])plan[toDay]=[];
+  if(plan[toDay].length>=TRIP_DAYS[toDay].max)return;
+  plan[fromDay]=plan[fromDay].filter(i=>i!==locIdx);
+  plan[toDay].push(locIdx);
+  savePlan();renderPlanner();
+}
+function planRemoveLoc(locIdx,fromDay){
+  plan[fromDay]=plan[fromDay].filter(i=>i!==locIdx);
+  savePlan();renderPlanner();
+}
+function planAddLoc(locIdx){
+  let bestDay=-1,bestSc=-1;
+  TRIP_DAYS.forEach((_,td)=>{
+    if(!plan[td])plan[td]=[];
+    if(plan[td].length>=TRIP_DAYS[td].max)return;
+    const sc=planComposite(locIdx,td);
+    if(sc>bestSc){bestSc=sc;bestDay=td}
+  });
+  if(bestDay>=0){plan[bestDay].push(locIdx);savePlan();renderPlanner()}
+}
+function planAddToDay(locIdx,dayIdx){
+  if(!plan[dayIdx])plan[dayIdx]=[];
+  if(plan[dayIdx].length>=TRIP_DAYS[dayIdx].max)return;
+  plan[dayIdx].push(locIdx);
+  savePlan();renderPlanner();
+}
+function planClear(){plan={};TRIP_DAYS.forEach((_,i)=>plan[i]=[]);savePlan();renderPlanner()}
+
+function renderPlanner(){
+  if(!weatherData)return;
+  const usedSet=assigned();
+  const pool=plannable().filter(i=>!usedSet.has(i));
+
+  let h=`<div class="planner-actions">
+    <button class="planner-btn planner-btn-primary" onclick="autoGenerate()">Auto-generuj plan</button>
+    <button class="planner-btn" onclick="planClear()">Wyczyść</button>
+  </div>`;
+
+  TRIP_DAYS.forEach((td,di)=>{
+    const fi=tripForecastIdx(di);
+    const dateObj=td.date.split('-');
+    const dayLabel=DAY_NAMES[new Date(Date.UTC(+dateObj[0],+dateObj[1]-1,+dateObj[2])).getUTCDay()];
+    const num=parseInt(dateObj[2]);
+    const accomName=td.accomIdx>=0?LOCATIONS[td.accomIdx].name:'Werona';
+
+    const items=(plan[di]||[]).map(li=>{
+      const loc=LOCATIONS[li];
+      const sc=planComposite(li,di);
+      const ws=locScore(li,fi);
+      const col=ws>=0?sColorRaw(ws):'#9CA3AF';
+      const t=TRAIL_META[li];
+      const detail=t?`${t.km}km · ↑${t.gain}m`:`${Math.round(weatherData[li]?.elevation||0)} m`;
+      return`<div class="plan-item">
+        <span class="plan-item-shape">${shapeSvg(loc.cat,col,'sm')}</span>
+        <span class="score-badge" style="background:${col};font-size:9px;min-width:22px;height:16px">${ws>=0?ws:'-'}</span>
+        <div class="plan-item-info"><div class="plan-item-name">${esc(loc.name)}</div><div class="plan-item-detail">${detail}</div></div>
+        <div class="plan-item-btns">
+          ${di>0?`<button class="plan-ibtn" onclick="planMoveLoc(${li},${di},-1)" title="Przesuń wcześniej">◀</button>`:''}
+          ${di<TRIP_DAYS.length-1?`<button class="plan-ibtn" onclick="planMoveLoc(${li},${di},1)" title="Przesuń później">▶</button>`:''}
+          <button class="plan-ibtn" onclick="planRemoveLoc(${li},${di})" title="Usuń">×</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    const slotsLeft=td.max-(plan[di]||[]).length;
+    const addHtml=slotsLeft>0&&pool.length>0?`<button class="plan-add-btn" onclick="planAddBestToDay(${di})">+ dodaj (${slotsLeft} ${slotsLeft===1?'miejsce':'miejsca'})</button>`:'';
+
+    h+=`<div class="plan-day">
+      <div class="plan-day-head">
+        <div class="plan-day-left">
+          <span class="plan-day-date">${dayLabel}, ${num} maja</span>
+          <span class="plan-day-accom">🏠 ${esc(accomName)}</span>
+          ${td.note?`<span class="plan-day-note">${td.note}</span>`:''}
+        </div>
+      </div>
+      <div class="plan-day-items">
+        ${items?items:`<div class="plan-empty">Brak zaplanowanych atrakcji</div>`}
+        ${addHtml}
+      </div>
+    </div>`;
+  });
+
+  if(pool.length){
+    h+=`<div class="plan-pool"><div class="plan-pool-title">Nieprzypisane (${pool.length})</div><div class="plan-pool-items">`;
+    pool.forEach(li=>{
+      const loc=LOCATIONS[li];
+      const f=favs[li]||{};
+      const badge=(f.hearted?'❤️ ':'')+(f.starred?'⭐ ':'');
+      h+=`<button class="plan-chip" onclick="planAddLoc(${li})">${shapeSvg(loc.cat,'var(--text2)','sm')}${badge}${esc(loc.name)}</button>`;
+    });
+    h+=`</div></div>`;
+  }
+
+  plannerView.innerHTML=h;
+}
+
+function planAddBestToDay(dayIdx){
+  const usedSet=assigned();
+  const pool=plannable().filter(i=>!usedSet.has(i));
+  if(!pool.length)return;
+  let bestLoc=-1,bestSc=-1;
+  pool.forEach(li=>{const sc=planComposite(li,dayIdx);if(sc>bestSc){bestSc=sc;bestLoc=li}});
+  if(bestLoc>=0)planAddToDay(bestLoc,dayIdx);
+}
+
 /* ---- Service Worker & tile pre-cache ---- */
 function precacheTiles(){
   if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
@@ -744,6 +995,7 @@ window.addEventListener('offline',()=>updateTimestamp());
 
 /* ---- Init ---- */
 loadFavs();
+loadPlan();
 loadSettings();
 initMap();
 renderFilters();
