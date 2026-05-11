@@ -126,6 +126,20 @@
     .day-precip{font-size:10px;font-weight:500;color:var(--accent);line-height:1;min-height:12px}
     .day-score{font-size:9px;font-weight:700;line-height:1;min-height:12px}
 
+    /* Sub-spots (merged into trails) */
+    .card-subs{border-top:1px solid var(--border);margin-top:8px;padding-top:6px}
+    .card-subs-title{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+    .card-sub{padding:4px 0;border-bottom:1px solid var(--bg-alt)}
+    .card-sub:last-child{border-bottom:none}
+    .card-sub-head{display:flex;align-items:center;gap:5px;font-size:11px;margin-bottom:4px}
+    .card-sub-name{font-weight:600;color:var(--text);font-size:12px}
+    .card-sub-elev{color:var(--text2);font-size:10px}
+    .card-sub-scores{display:grid;grid-template-columns:repeat(8,1fr);gap:0;text-align:center}
+    .card-sub-sc{font-size:9px;font-weight:700;padding:2px 0}
+    .card-sub-day{display:flex;align-items:center;gap:5px;font-size:12px}
+    .plan-sub{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 36px;font-size:11px;color:var(--text2)}
+    .plan-sub-name{font-weight:500;color:var(--text)}
+
     /* Tabs */
     .tabs{display:flex;padding:0 16px;gap:0;margin-top:8px}
     .tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);background:none;border:none;border-bottom:2px solid var(--border);font-family:var(--font);transition:all .15s}
@@ -479,7 +493,6 @@ function trailMetaRow(idx){
     <span class="trail-meta-item">★ ${t.rating} <span style="opacity:.5">(${t.reviews})</span></span>
     <a class="trail-at-link" href="https://www.alltrails.com/${t.slug}" target="_blank" rel="noopener">AllTrails →</a>
     <a class="trail-at-link" href="#" onclick="toggleTrailPois(${idx});return false">📍 Mapa</a>
-    ${t.includes&&t.includes.length?`<span class="trail-meta-item" style="width:100%;margin-top:2px">Obejmuje: ${t.includes.map(i=>LOCATIONS[i].name).join(', ')}</span>`:''}
   </div>`;
 }
 
@@ -544,11 +557,44 @@ async function loadWeather(force=false){
 }
 function afterLoad(){renderDayPicker();render();updateTimestamp();updateMapAll()}
 
+/* ---- Sub-spot helpers ---- */
+function subSpotsWeek(locIdx){
+  const t=TRAIL_META[locIdx];
+  if(!t||!t.includes||!t.includes.length)return'';
+  const subs=t.includes.map(si=>{
+    const d=weatherData[si],loc=LOCATIONS[si];
+    if(!d)return'';
+    const elev=Math.round(d.elevation);
+    const scores=d.daily.time.map((_,i)=>{
+      const sc=locScore(si,i);
+      return`<span class="card-sub-sc" style="color:${sc>=0?sColorRaw(sc):'var(--neutral)'}">${sc>=0?sc:'-'}</span>`;
+    }).join('');
+    return`<div class="card-sub"><div class="card-sub-head">${shapeSvg(loc.cat,'var(--text2)','sm')}<span class="card-sub-name">${esc(loc.name)}</span><span class="card-sub-elev">${elev.toLocaleString('pl-PL')} m</span></div><div class="card-sub-scores">${scores}</div></div>`;
+  }).join('');
+  if(!subs)return'';
+  return`<div class="card-subs"><div class="card-subs-title">Obejmuje</div>${subs}</div>`;
+}
+function subSpotsDay(locIdx,di){
+  const t=TRAIL_META[locIdx];
+  if(!t||!t.includes||!t.includes.length)return'';
+  const subs=t.includes.map(si=>{
+    const d=weatherData[si],loc=LOCATIONS[si];
+    if(!d)return'';
+    const code=d.daily.weathercode[di],hi=Math.round(d.daily.temperature_2m_max[di]),lo=Math.round(d.daily.temperature_2m_min[di]);
+    const sc=locScore(si,di),col=sc>=0?sColorRaw(sc):'#9CA3AF';
+    const elev=Math.round(d.elevation),desc=WEATHER_DESC[code]||'';
+    return`<div class="card-sub"><div class="card-sub-day">${shapeSvg(loc.cat,col,'sm')}<span class="score-badge" style="background:${col};font-size:9px;min-width:20px;height:15px">${sc>=0?sc:'-'}</span><span class="card-sub-name">${esc(loc.name)}</span><span class="card-sub-elev">${elev.toLocaleString('pl-PL')} m</span><span style="color:var(--text2);font-size:11px">${hi}°/${lo}° ${desc}</span></div></div>`;
+  }).join('');
+  if(!subs)return'';
+  return`<div class="card-subs"><div class="card-subs-title">Obejmuje</div>${subs}</div>`;
+}
+
 /* ---- Render ---- */
 function render(){
   if(!weatherData)return;
   const today=todayStr(),di=activeDayIdx();
   let items=LOCATIONS.map((l,i)=>({...l,idx:i})).filter(l=>{
+    if(MERGED_SPOTS.has(l.idx))return false;
     if(activeFilter==='all')return true;
     if(activeFilter==='starred')return favs[l.idx]&&favs[l.idx].starred;
     if(activeFilter==='hearted')return favs[l.idx]&&favs[l.idx].hearted;
@@ -584,6 +630,7 @@ function render(){
             ${wind>20?`<span class="card-day-wind">${Math.round(wind)} km/h</span>`:''}
           </div>
         </div>
+        ${subSpotsDay(loc.idx,di)}
       </div>`;
     }).join('');
   } else {
@@ -612,6 +659,7 @@ function render(){
         ${cardUrlRow(loc.idx)}
         ${trailMetaRow(loc.idx)}
         <div class="forecast">${days}</div>
+        ${subSpotsWeek(loc.idx)}
       </div>`;
     }).join('');
   }
@@ -627,10 +675,10 @@ function renderSkeleton(){
 function renderFilters(){
   filtersEl.innerHTML=Object.entries(CATS).map(([k,label])=>{
     let cnt;
-    if(k==='all')cnt=LOCATIONS.length;
+    if(k==='all')cnt=LOCATIONS.filter((_,i)=>!MERGED_SPOTS.has(i)).length;
     else if(k==='starred')cnt=LOCATIONS.filter((_,i)=>favs[i]&&favs[i].starred).length;
     else if(k==='hearted')cnt=LOCATIONS.filter((_,i)=>favs[i]&&favs[i].hearted).length;
-    else cnt=LOCATIONS.filter(l=>l.cat===k).length;
+    else cnt=LOCATIONS.filter((l,i)=>l.cat===k&&!MERGED_SPOTS.has(i)).length;
     const act=k===activeFilter;
     let sh='';
     if(k==='starred')sh=`<span style="font-size:12px">${act?'⭐':'☆'}</span>`;
@@ -962,6 +1010,12 @@ function renderPlanner(){
       const col=ws>=0?sColorRaw(ws):'#9CA3AF';
       const t=TRAIL_META[li];
       const detail=t?`${t.km}km · ↑${t.gain}m`:`${Math.round(weatherData[li]?.elevation||0)} m`;
+      const subs=(t&&t.includes||[]).map(si=>{
+        const sloc=LOCATIONS[si],sd=weatherData[si];
+        if(!sd)return'';
+        const sws=locScore(si,fi),scol=sws>=0?sColorRaw(sws):'#9CA3AF';
+        return`<div class="plan-sub">${shapeSvg(sloc.cat,scol,'sm')}<span class="score-badge" style="background:${scol};font-size:8px;min-width:18px;height:14px">${sws>=0?sws:'-'}</span><span class="plan-sub-name">${esc(sloc.name)}</span><span style="font-size:10px">${Math.round(sd.elevation)} m</span></div>`;
+      }).join('');
       return`<div class="plan-item">
         <span class="plan-item-shape">${shapeSvg(loc.cat,col,'sm')}</span>
         <span class="score-badge" style="background:${col};font-size:9px;min-width:22px;height:16px">${ws>=0?ws:'-'}</span>
@@ -971,7 +1025,7 @@ function renderPlanner(){
           ${di<TRIP_DAYS.length-1?`<button class="plan-ibtn" onclick="planMoveLoc(${li},${di},1)" title="Przesuń później">▶</button>`:''}
           <button class="plan-ibtn" onclick="planRemoveLoc(${li},${di})" title="Usuń">×</button>
         </div>
-      </div>`;
+      </div>${subs}`;
     }).join('');
 
     const slotsLeft=td.max-(plan[di]||[]).length;
