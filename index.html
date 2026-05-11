@@ -844,7 +844,12 @@ function autoGenerate(){
   [hearted,starred,rest].forEach(group=>{
     const scored=[];
     group.forEach(li=>{
-      TRIP_DAYS.forEach((_,td)=>{scored.push({li,td,sc:planComposite(li,td)})});
+      TRIP_DAYS.forEach((_,td)=>{
+        const fi=tripForecastIdx(td);
+        const ws=locScore(li,fi);
+        if(ws<settings.threshOk)return;
+        scored.push({li,td,sc:planComposite(li,td)});
+      });
     });
     scored.sort((a,b)=>b.sc-a.sc);
     const used=assigned();
