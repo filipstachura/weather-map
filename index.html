@@ -6,6 +6,7 @@
   <title>Dolomity 2026</title>
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <style>
@@ -434,7 +435,16 @@ function locScore(idx,di){const d=weatherData[idx];if(!d)return-1;return wScore(
 function activeDayIdx(){return selectedDay!==null?selectedDay:todayIdx()}
 
 /* ---- Cache ---- */
-function getCache(){try{const r=localStorage.getItem(CACHE_KEY);if(!r)return null;const c=JSON.parse(r);if(Date.now()-c.ts>CACHE_TTL)return null;if(c.data[0]&&!c.data[0].daily.time.includes(todayStr()))return null;return c}catch{return null}}
+function getCache(allowStale){
+  try{
+    const r=localStorage.getItem(CACHE_KEY);if(!r)return null;
+    const c=JSON.parse(r);
+    if(allowStale)return c;
+    if(Date.now()-c.ts>CACHE_TTL)return null;
+    if(c.data[0]&&!c.data[0].daily.time.includes(todayStr()))return null;
+    return c;
+  }catch{return null}
+}
 function setCache(data){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data}))}catch{}}
 
 /* ---- API ---- */
@@ -444,12 +454,22 @@ async function fetchOne(lat,lon){
 }
 
 async function loadWeather(force=false){
-  if(!force){const c=getCache();if(c){weatherData=c.data;cacheTime=c.ts;afterLoad();return}}
+  if(!force){const c=getCache(false);if(c){weatherData=c.data;cacheTime=c.ts;afterLoad();return}}
+  if(!navigator.onLine){
+    const stale=getCache(true);
+    if(stale){weatherData=stale.data;cacheTime=stale.ts;afterLoad();return}
+    return;
+  }
   renderSkeleton();refreshBtn.classList.add('spinning');progress.classList.remove('done');progress.style.width='0';
   let done=0;const total=LOCATIONS.length;
-  const results=await Promise.allSettled(LOCATIONS.map(async loc=>{const d=await fetchOne(loc.lat,loc.lon);done++;progress.style.width=(done/total*100)+'%';return d}));
-  weatherData=results.map(r=>r.status==='fulfilled'?r.value:null);
-  cacheTime=Date.now();setCache(weatherData);
+  try{
+    const results=await Promise.allSettled(LOCATIONS.map(async loc=>{const d=await fetchOne(loc.lat,loc.lon);done++;progress.style.width=(done/total*100)+'%';return d}));
+    weatherData=results.map(r=>r.status==='fulfilled'?r.value:null);
+    cacheTime=Date.now();setCache(weatherData);
+  }catch{
+    const stale=getCache(true);
+    if(stale){weatherData=stale.data;cacheTime=stale.ts}
+  }
   progress.style.width='100%';setTimeout(()=>progress.classList.add('done'),200);
   refreshBtn.classList.remove('spinning');afterLoad();
 }
@@ -615,7 +635,15 @@ settingsOverlay.addEventListener('click',e=>{if(e.target===settingsOverlay)setti
 
 /* ---- Refresh ---- */
 refreshBtn.addEventListener('click',()=>loadWeather(true));
-function updateTimestamp(){if(!cacheTime){updatedEl.textContent='';return}const m=Math.floor((Date.now()-cacheTime)/60000);updatedEl.textContent=m<1?'Zaktualizowano teraz':`Zaktualizowano ${m} min temu`}
+function updateTimestamp(){
+  if(!cacheTime){updatedEl.textContent='';return}
+  const m=Math.floor((Date.now()-cacheTime)/60000);
+  const offline=!navigator.onLine?' · offline':'';
+  if(m<1)updatedEl.textContent='Zaktualizowano teraz'+offline;
+  else if(m<60)updatedEl.textContent=`Zaktualizowano ${m} min temu${offline}`;
+  else if(m<1440)updatedEl.textContent=`Zaktualizowano ${Math.floor(m/60)} godz. temu${offline}`;
+  else updatedEl.textContent=`Zaktualizowano ${Math.floor(m/1440)} dni temu${offline}`;
+}
 setInterval(updateTimestamp,60000);
 setInterval(()=>loadWeather(false),CACHE_TTL);
 
@@ -687,6 +715,32 @@ function toggleTrailPois(locIdx){
   if(activeTrailIdx===locIdx){clearTrailPois();return}
   showTrailPois(locIdx);
 }
+
+/* ---- Service Worker & tile pre-cache ---- */
+function precacheTiles(){
+  if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
+  const bbox={latMin:46.3,latMax:46.75,lonMin:11.5,lonMax:12.4};
+  const urls=[];
+  for(let z=10;z<=13;z++){
+    const xMin=lon2tile(bbox.lonMin,z),xMax=lon2tile(bbox.lonMax,z);
+    const yMin=lat2tile(bbox.latMax,z),yMax=lat2tile(bbox.latMin,z);
+    for(let x=xMin;x<=xMax;x++)for(let y=yMin;y<=yMax;y++){
+      const sub='abcd'[(x+y)%4];
+      urls.push(`https://${sub}.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`);
+    }
+  }
+  navigator.serviceWorker.controller.postMessage({type:'PRECACHE_TILES',urls});
+}
+function lon2tile(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z))}
+function lat2tile(lat,z){return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,z))}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(()=>{
+    setTimeout(precacheTiles,3000);
+  });
+}
+window.addEventListener('online',()=>{updateTimestamp();loadWeather()});
+window.addEventListener('offline',()=>updateTimestamp());
 
 /* ---- Init ---- */
 loadFavs();
