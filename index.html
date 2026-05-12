@@ -320,6 +320,15 @@ const LOCATIONS = [
   { name: 'Lagazuoi–Cinque Torri (Alta Via 1)', lat: 46.52764, lon: 12.0082, cat: 'trail' },
   { name: 'Cadini di Misurina via Auronzo', lat: 46.61225, lon: 12.29641, cat: 'trail' },
   { name: 'Lago di Carezza–Lago di Mezzo', lat: 46.41034, lon: 11.57584, cat: 'trail' },
+  { name: 'Lake Sorapis via Rifugio Cristallo', lat: 46.54686, lon: 12.24856, cat: 'trail' },
+  { name: 'Lake Sorapiss–Passo Tre Croci loop', lat: 46.5468, lon: 12.24871, cat: 'trail' },
+  { name: 'Forcella Ambrizzola via Lago Fedèra', lat: 46.50583, lon: 12.07844, cat: 'trail' },
+  { name: 'Three Peaks of Lavaredo', lat: 46.61223, lon: 12.29642, cat: 'trail' },
+  { name: 'Lake Sorapis via Passo Tre Croci', lat: 46.55614, lon: 12.20462, cat: 'trail' },
+  { name: 'Adolf Munkel Trail', lat: 46.63579, lon: 11.7658, cat: 'trail' },
+  { name: 'Cinque Torri Loop', lat: 46.50849, lon: 12.05564, cat: 'trail' },
+  { name: 'Cinque Torri via Baita Bai de Dones', lat: 46.51866, lon: 12.03814, cat: 'trail' },
+  { name: 'Monte Piz–Schgaguler via Monte Sëuc', lat: 46.55804, lon: 11.6647, cat: 'trail' },
 ];
 
 const TRAIL_META = {
@@ -341,6 +350,24 @@ const TRAIL_META = {
     includes:[10],pois:[[46.6024839,12.2976006],[46.6009257,12.2954732],[46.6122047,12.2960952]]},
   31:{km:4.3,gain:173,high:1684,diff:'moderate',type:'loop',rating:4.5,reviews:499,slug:'trail/italy/south-tyrol/lago-di-carezza-lago-di-mezzo',
     includes:[14],pois:[[46.408937,11.5736492],[46.4032417,11.5796126],[46.4101552,11.5759371]]},
+  32:{km:9.5,gain:714,high:1940,diff:'hard',type:'out & back',rating:4.7,reviews:793,slug:'trail/italy/veneto/lago-di-sorapis-via-trail-217',
+    includes:[16],pois:[[46.5205489,12.2232393],[46.521673,12.2266189]]},
+  33:{km:15.0,gain:866,high:1937,diff:'hard',type:'loop',rating:4.6,reviews:197,slug:'trail/italy/veneto/rifugio-cristallo-lago-sorapis-rifugio-vandelli-passo-tre-croci',
+    includes:[16],pois:[[46.5205489,12.2232393],[46.521673,12.2266189]]},
+  34:{km:13.0,gain:912,high:2475,diff:'hard',type:'loop',rating:4.8,reviews:616,slug:'trail/italy/veneto/croda-da-lago-lago-federa-forcella-ambrizzola',
+    pois:[[46.4791667,12.0980556],[46.4881988,12.0968015],[46.5067321,12.0887625],[46.4817466,12.0979804],[46.4841642,12.0977551],[46.4833294,12.0974895],[46.4827975,12.0979737],[46.488204,12.1018267],[46.4881011,12.1043606],[46.5016147,12.0536175],[46.4865062,12.1057495],[46.4824521,12.0980018]]},
+  35:{km:10.1,gain:493,high:2481,diff:'moderate',type:'loop',rating:4.8,reviews:6212,slug:'trail/italy/veneto/tre-cime-di-lavaredo-drei-zinnen',
+    includes:[11,12],pois:[[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6389935,12.3082242],[46.6136422,12.3062679],[46.6127831,12.2927184],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]},
+  36:{km:12.7,gain:598,high:1943,diff:'hard',type:'out & back',rating:4.7,reviews:4628,slug:'trail/italy/veneto/passo-tre-croci-lago-sorapis',
+    includes:[16],pois:[[46.5205489,12.2232393],[46.521673,12.2266189]]},
+  37:{km:9.7,gain:466,high:2037,diff:'moderate',type:'loop',rating:4.8,reviews:2788,slug:'trail/italy/south-tyrol/via-delle-odle-zanser-alm-rifugio-delle-odle-malga-dusler',
+    includes:[19,20],pois:[[46.6476368,11.6193826]]},
+  38:{km:2.1,gain:118,high:2250,diff:'moderate',type:'loop',rating:4.8,reviews:707,slug:'trail/italy/veneto/giro-cinque-torri',
+    pois:[[46.5097764,12.0522889],[46.5095798,12.0519072],[46.509674,12.0521257],[46.5090754,12.0518683],[46.5105012,12.0514722],[46.5103332,12.0511933],[46.5106914,12.0509157],[46.5098911,12.0508191],[46.5100785,12.0490605],[46.5082178,12.054733],[46.5080886,12.0467715]]},
+  39:{km:6.9,gain:414,high:2273,diff:'moderate',type:'loop',rating:4.6,reviews:1216,slug:'trail/italy/veneto/baita-bai-de-dones-cinque-torri',
+    pois:[[46.5095798,12.0519072],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5194816,12.0410153],[46.5105012,12.0514722],[46.5103332,12.0511933],[46.5106914,12.0509157],[46.5098911,12.0508191],[46.5082178,12.054733],[46.5080886,12.0467715]]},
+  40:{km:7.7,gain:243,high:2019,diff:'moderate',type:'loop',rating:4.7,reviews:873,slug:'trail/italy/south-tyrol/monte-seuc-piz-schgaguler-schwaige',
+    includes:[18],pois:[[46.5587949,11.670502],[46.5581918,11.6539529],[46.5484452,11.6488402]]},
 };
 
 const MERGED_SPOTS=new Set();
@@ -520,7 +547,7 @@ function trailMetaRow(idx){
 }
 
 /* ---- State ---- */
-const CACHE_KEY='dol26w5';
+const CACHE_KEY='dol26w6';
 const CACHE_TTL=30*60*1000;
 let weatherData=null,cacheTime=null,activeFilter='all',selectedDay=null,map,markers=[];
 let trailPoiLayer=null,activeTrailIdx=null;
