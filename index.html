@@ -100,6 +100,8 @@
     .trail-meta-item strong{color:var(--text);font-weight:600}
     .trail-at-link{font-size:11px;color:var(--accent);text-decoration:none}
     .trail-at-link:hover{text-decoration:underline}
+    .hourly-link{font-size:10px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:3px}
+    .hourly-link:hover{color:var(--accent);text-decoration:underline}
     .card-error-msg{font-size:12px;color:var(--text2);padding:16px 0;text-align:center}
 
     /* Card day view */
@@ -519,6 +521,10 @@ function cardActions(idx){
     <button class="card-act${f.starred?' starred':''}" onclick="toggleStar(${idx})" title="Gwiazdka">${f.starred?IC_STAR_FILLED:IC_STAR_OUTLINE}</button>
   </div>`;
 }
+function hourlyLink(idx){
+  const loc=LOCATIONS[idx];
+  return`<a class="hourly-link" href="https://www.yr.no/en/forecast/hourly-table/lat~${loc.lat}/lon~${loc.lon}" target="_blank" rel="noopener">⏱ yr.no godzinowo →</a>`;
+}
 function cardNoteRow(idx){
   const f=getFav(idx)||{};
   if(!f.note)return'';
@@ -682,6 +688,7 @@ function render(){
           </div>
         </div>
         ${subSpotsDay(loc.idx,di)}
+        ${hourlyLink(loc.idx)}
       </div>`;
     }).join('');
   } else {
@@ -712,6 +719,7 @@ function render(){
         ${trailMetaRow(loc.idx)}
         <div class="forecast">${days}</div>
         ${subSpotsWeek(loc.idx)}
+        ${hourlyLink(loc.idx)}
       </div>`;
     }).join('');
   }
@@ -1071,7 +1079,7 @@ function renderPlanner(){
       return`<div class="plan-item">
         <span class="plan-item-shape">${shapeSvg(loc.cat,col,'sm')}</span>
         <span class="score-badge" style="background:${col};font-size:9px;min-width:22px;height:16px">${ws>=0?ws:'-'}</span>
-        <div class="plan-item-info"><div class="plan-item-name">${esc(loc.name)}</div><div class="plan-item-detail">${detail}${(favs[li]&&favs[li].note)?` · ${esc(favs[li].note)}`:''}</div></div>
+        <div class="plan-item-info"><div class="plan-item-name">${esc(loc.name)}</div><div class="plan-item-detail">${detail}${(favs[li]&&favs[li].note)?` · ${esc(favs[li].note)}`:''}</div><a class="hourly-link" href="https://www.yr.no/en/forecast/hourly-table/lat~${loc.lat}/lon~${loc.lon}" target="_blank" rel="noopener" onclick="event.stopPropagation()">⏱ yr.no →</a></div>
         <div class="plan-item-btns">
           ${di>0?`<button class="plan-ibtn" onclick="planMoveLoc(${li},${di},-1)" title="Przesuń wcześniej">◀</button>`:''}
           ${di<TRIP_DAYS.length-1?`<button class="plan-ibtn" onclick="planMoveLoc(${li},${di},1)" title="Przesuń później">▶</button>`:''}
