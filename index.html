@@ -662,14 +662,16 @@ function subSpotsDay(locIdx,di){
 function render(){
   if(!weatherData)return;
   const today=todayStr(),di=activeDayIdx();
-  let items=LOCATIONS.map((l,i)=>({...l,idx:i})).filter(l=>{
+  let allItems=LOCATIONS.map((l,i)=>({...l,idx:i})).filter(l=>{
     if(MERGED_SPOTS.has(l.idx))return false;
     if(activeFilter==='all')return true;
     if(activeFilter==='starred')return favs[l.idx]&&favs[l.idx].starred;
     if(activeFilter==='hearted')return favs[l.idx]&&favs[l.idx].hearted;
     return l.cat===activeFilter;
   });
-  if(!items.length){grid.innerHTML='<p style="text-align:center;color:var(--text2);padding:32px 0;font-size:13px">Brak lokalizacji</p>';return}
+  const items=allItems.filter(l=>!(favs[l.idx]&&favs[l.idx].banned));
+  const banned=allItems.filter(l=>favs[l.idx]&&favs[l.idx].banned);
+  if(!allItems.length){grid.innerHTML='<p style="text-align:center;color:var(--text2);padding:32px 0;font-size:13px">Brak lokalizacji</p>';return}
 
   if(selectedDay!==null){
     items.sort((a,b)=>locScore(b.idx,di)-locScore(a.idx,di));
@@ -680,7 +682,7 @@ function render(){
       const prob=d.daily.precipitation_probability_max[di],precip=d.daily.precipitation_sum[di];
       const wind=locWind(loc.idx,di),elev=Math.round(d.elevation),desc=WEATHER_DESC[code]||'';
       const sc=locScore(loc.idx,di),col=sColor(sc),colRaw=sColorRaw(sc);
-      return`<div class="card card-day${favs[loc.idx]&&favs[loc.idx].banned?' is-banned':''}" style="border-left-color:${col}" data-cat="${loc.cat}">
+      return`<div class="card card-day" style="border-left-color:${col}" data-cat="${loc.cat}">
         <div class="card-head">
           <div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,col,'sm')}<span class="card-name-text">${esc(loc.name)}</span></span><span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span></div>
           <div class="card-head-right">${cardActions(loc.idx)}</div>
@@ -722,7 +724,7 @@ function render(){
           <span class="day-score" style="color:${dsc>=0?sColorRaw(dsc):'var(--neutral)'}">${dsc>=0?dsc:''}</span>
         </div>`;
       }).join('');
-      return`<div class="card${favs[loc.idx]&&favs[loc.idx].banned?' is-banned':''}" data-cat="${loc.cat}">
+      return`<div class="card" data-cat="${loc.cat}">
         <div class="card-head">
           <div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,col,'sm')}<span class="card-name-text">${esc(loc.name)}</span></span><span class="card-elev">${elev.toLocaleString('pl-PL')}&nbsp;m</span></div>
           <div class="card-head-right">${cardActions(loc.idx)}</div>
@@ -735,6 +737,19 @@ function render(){
         ${hourlyLink(loc.idx)}
       </div>`;
     }).join('');
+  }
+  if(banned.length){
+    const bannedCards=banned.map(loc=>{
+      const d=weatherData[loc.idx];
+      const elev=d?Math.round(d.elevation)+'&nbsp;m':'';
+      return`<div class="card is-banned">
+        <div class="card-head">
+          <div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,'var(--neutral)','sm')}<span class="card-name-text">${esc(loc.name)}</span></span><span class="card-elev">${elev}</span></div>
+          <div class="card-head-right">${cardActions(loc.idx)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    grid.innerHTML+=`<div style="grid-column:1/-1;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Wykluczone (${banned.length})</div><div style="display:grid;grid-template-columns:inherit;gap:8px">${bannedCards}</div></div>`;
   }
 }
 
