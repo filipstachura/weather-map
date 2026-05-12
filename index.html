@@ -590,6 +590,13 @@ async function fetchOne(lat,lon){
   const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max&timezone=Europe/Rome&forecast_days=8`;
   const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json();
 }
+async function fetchWithRetry(lat,lon,retries=2){
+  for(let i=0;i<=retries;i++){
+    try{return await fetchOne(lat,lon)}catch(e){if(i<retries)await new Promise(r=>setTimeout(r,500*(i+1)))}
+  }
+  return null;
+}
+function delay(ms){return new Promise(r=>setTimeout(r,ms))}
 
 async function loadWeather(force=false){
   if(!force){const c=getCache(false);if(c){weatherData=c.data;cacheTime=c.ts;afterLoad();return}}
@@ -600,9 +607,15 @@ async function loadWeather(force=false){
   }
   renderSkeleton();refreshBtn.classList.add('spinning');progress.classList.remove('done');progress.style.width='0';
   let done=0;const total=LOCATIONS.length;
+  const BATCH=8;
   try{
-    const results=await Promise.allSettled(LOCATIONS.map(async loc=>{const d=await fetchOne(loc.lat,loc.lon);done++;progress.style.width=(done/total*100)+'%';return d}));
-    weatherData=results.map(r=>r.status==='fulfilled'?r.value:null);
+    weatherData=new Array(total).fill(null);
+    for(let i=0;i<total;i+=BATCH){
+      const batch=LOCATIONS.slice(i,i+BATCH);
+      const results=await Promise.allSettled(batch.map(loc=>fetchWithRetry(loc.lat,loc.lon)));
+      results.forEach((r,j)=>{weatherData[i+j]=r.status==='fulfilled'?r.value:null;done++;progress.style.width=(done/total*100)+'%'});
+      if(i+BATCH<total)await delay(200);
+    }
     cacheTime=Date.now();setCache(weatherData);
   }catch{
     const stale=getCache(true);
