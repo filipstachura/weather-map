@@ -784,6 +784,33 @@ function renderLegend(){
 dayPickerEl.addEventListener('click',e=>{const b=e.target.closest('.dpick');if(!b)return;const d=parseInt(b.dataset.day);selectedDay=selectedDay===d?null:d;renderDayPicker();render();updateMapAll()});
 
 /* ---- Settings panel ---- */
+function exportData(){
+  const data={favs,plan,settings,v:1};
+  const json=JSON.stringify(data);
+  navigator.clipboard.writeText(json).then(()=>{
+    const el=$('syncStatus');el.style.color='var(--good)';el.textContent='Skopiowano do schowka!';
+    setTimeout(()=>el.textContent='',3000);
+  }).catch(()=>{
+    prompt('Skopiuj ręcznie:',json);
+  });
+}
+function importData(){
+  const json=prompt('Wklej dane:');
+  if(!json)return;
+  const el=$('syncStatus');
+  try{
+    const data=JSON.parse(json);
+    if(data.favs){favs=data.favs;saveFavs()}
+    if(data.plan){plan=data.plan;savePlan()}
+    if(data.settings){settings={...defaultSettings(),...data.settings};saveSettings()}
+    el.style.color='var(--good)';el.textContent='Zaimportowano!';
+    renderSettingsPanel();fullRefresh();renderFilters();
+  }catch{
+    el.style.color='var(--bad)';el.textContent='Błąd: nieprawidłowe dane';
+    setTimeout(()=>el.textContent='',3000);
+  }
+}
+
 function renderSettingsPanel(){
   settingsBody.innerHTML=SETTINGS_SCHEMA.map(g=>{
     const items=g.items.map(s=>{
@@ -794,8 +821,19 @@ function renderSettingsPanel(){
       </div>`;
     }).join('');
     return`<div class="setting-group"><div class="setting-group-title">${g.group}</div>${items}</div>`;
-  }).join('')+`<button class="settings-reset" id="settingsReset">Przywróć domyślne</button>`;
+  }).join('')+`
+    <div class="setting-group"><div class="setting-group-title">Synchronizacja</div>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:10px">Eksportuj dane (gwiazdki, serca, bany, notatki, URL, plan) i wklej na drugim urządzeniu.</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="settings-reset" id="syncExport" style="flex:1">Kopiuj dane</button>
+        <button class="settings-reset" id="syncImport" style="flex:1">Wklej dane</button>
+      </div>
+      <div id="syncStatus" style="font-size:11px;min-height:16px;color:var(--good)"></div>
+    </div>
+    <button class="settings-reset" id="settingsReset">Przywróć domyślne</button>`;
   $('settingsReset').addEventListener('click',()=>{settings=defaultSettings();saveSettings();renderSettingsPanel();fullRefresh()});
+  $('syncExport').addEventListener('click',exportData);
+  $('syncImport').addEventListener('click',importData);
 }
 
 settingsBody.addEventListener('input',e=>{
