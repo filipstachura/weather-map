@@ -89,7 +89,9 @@
     .card-act.hearted{color:#EF4444}
     .card-act.has-url{color:var(--accent)}
     .card-act.banned{color:var(--bad)}
+    .card-act.done{color:var(--good)}
     .card.is-banned{opacity:.4}
+    .card.is-done{opacity:.5}
     .card-note{font-size:11px;color:var(--text2);font-style:italic;margin-top:2px;padding:3px 6px;background:var(--bg-alt);border-radius:3px;cursor:pointer;line-height:1.4}
     .card-note:hover{color:var(--text)}
     .card-url-link{font-size:11px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:2px;max-width:100%;overflow:hidden}
@@ -494,6 +496,7 @@ function editUrl(idx){
   saveFavs();fullRefresh();
 }
 function toggleBan(idx){const f=getFav(idx);f.banned=!f.banned;saveFavs();fullRefresh()}
+function toggleDone(idx){const f=getFav(idx);f.done=!f.done;saveFavs();fullRefresh()}
 function editNote(idx){
   const f=getFav(idx);
   const cur=f.note||'';
@@ -511,9 +514,12 @@ const IC_LINK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 const IC_NOTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const IC_BAN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>';
 
+const IC_CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
 function cardActions(idx){
   const f=getFav(idx)||{};
   return`<div class="card-actions">
+    <button class="card-act${f.done?' done':''}" onclick="event.stopPropagation();toggleDone(${idx})" title="${f.done?'Oznacz jako niezrobione':'Zrobione!'}">${IC_CHECK}</button>
     <button class="card-act${f.banned?' banned':''}" onclick="event.stopPropagation();toggleBan(${idx})" title="${f.banned?'Odbanuj':'Wyklucz z planera'}">${IC_BAN}</button>
     <button class="card-act${f.note?' has-url':''}" onclick="editNote(${idx})" title="${f.note?'Edytuj notatkę':'Dodaj notatkę'}">${IC_NOTE}</button>
     <button class="card-act${f.url?' has-url':''}" onclick="editUrl(${idx})" title="${f.url?'Edytuj URL':'Dodaj URL'}">${IC_LINK}</button>
@@ -669,7 +675,8 @@ function render(){
     if(activeFilter==='hearted')return favs[l.idx]&&favs[l.idx].hearted;
     return l.cat===activeFilter;
   });
-  const items=allItems.filter(l=>!(favs[l.idx]&&favs[l.idx].banned));
+  const items=allItems.filter(l=>!(favs[l.idx]&&favs[l.idx].banned)&&!(favs[l.idx]&&favs[l.idx].done));
+  const done=allItems.filter(l=>favs[l.idx]&&favs[l.idx].done&&!(favs[l.idx]&&favs[l.idx].banned));
   const banned=allItems.filter(l=>favs[l.idx]&&favs[l.idx].banned);
   if(!allItems.length){grid.innerHTML='<p style="text-align:center;color:var(--text2);padding:32px 0;font-size:13px">Brak lokalizacji</p>';return}
 
@@ -737,6 +744,20 @@ function render(){
         ${hourlyLink(loc.idx)}
       </div>`;
     }).join('');
+  }
+  if(done.length){
+    const doneCards=done.map(loc=>{
+      const d=weatherData[loc.idx];
+      const elev=d?Math.round(d.elevation)+'&nbsp;m':'';
+      const note=favs[loc.idx]&&favs[loc.idx].note?`<span style="font-size:11px;color:var(--text2);font-style:italic"> — ${esc(favs[loc.idx].note)}</span>`:'';
+      return`<div class="card is-done">
+        <div class="card-head">
+          <div class="card-head-left"><span class="card-name">${shapeSvg(loc.cat,'var(--good)','sm')}<span class="card-name-text">✅ ${esc(loc.name)}</span></span>${note}<span class="card-elev">${elev}</span></div>
+          <div class="card-head-right">${cardActions(loc.idx)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    grid.innerHTML+=`<div style="grid-column:1/-1;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:600;color:var(--good);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Zrobione (${done.length})</div><div style="display:grid;grid-template-columns:inherit;gap:8px">${doneCards}</div></div>`;
   }
   if(banned.length){
     const bannedCards=banned.map(loc=>{
@@ -903,6 +924,10 @@ function initMap(){
 }
 function mkIcon(cat,color,locIdx){
   const f=locIdx!=null?favs[locIdx]:null;
+  if(f&&f.done){
+    const html='<span style="font-size:16px;line-height:1">✅</span>';
+    return L.divIcon({html,iconSize:[16,16],iconAnchor:[8,8],popupAnchor:[0,-8],className:''});
+  }
   let badges='';
   if(f&&f.starred)badges+='<span style="position:absolute;top:-6px;right:-6px;font-size:10px;line-height:1">⭐</span>';
   if(f&&f.hearted)badges+='<span style="position:absolute;top:-6px;'+(f&&f.starred?'right:6px':'right:-6px')+';font-size:10px;line-height:1">❤️</span>';
@@ -1023,7 +1048,7 @@ function planComposite(locIdx,tripDay){
   return Math.max(0,Math.round(ws-distPen));
 }
 
-function plannable(){return LOCATIONS.map((_,i)=>i).filter(i=>LOCATIONS[i].cat!=='stay'&&!MERGED_SPOTS.has(i)&&!(favs[i]&&favs[i].banned))}
+function plannable(){return LOCATIONS.map((_,i)=>i).filter(i=>LOCATIONS[i].cat!=='stay'&&!MERGED_SPOTS.has(i)&&!(favs[i]&&favs[i].banned)&&!(favs[i]&&favs[i].done))}
 function assigned(){const s=new Set();Object.values(plan).forEach(a=>a.forEach(i=>s.add(i)));return s}
 
 function autoGenerate(){
