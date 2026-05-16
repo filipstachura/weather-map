@@ -928,6 +928,10 @@ function mkIcon(cat,color,locIdx){
     const html='<span style="font-size:16px;line-height:1">✅</span>';
     return L.divIcon({html,iconSize:[16,16],iconAnchor:[8,8],popupAnchor:[0,-8],className:''});
   }
+  if(f&&f.banned){
+    const html='<span style="font-size:16px;line-height:1">❌</span>';
+    return L.divIcon({html,iconSize:[16,16],iconAnchor:[8,8],popupAnchor:[0,-8],className:''});
+  }
   let badges='';
   if(f&&f.starred)badges+='<span style="position:absolute;top:-6px;right:-6px;font-size:10px;line-height:1">⭐</span>';
   if(f&&f.hearted)badges+='<span style="position:absolute;top:-6px;'+(f&&f.starred?'right:6px':'right:-6px')+';font-size:10px;line-height:1">❤️</span>';
