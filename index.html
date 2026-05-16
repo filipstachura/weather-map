@@ -938,7 +938,14 @@ function mkIcon(cat,color,locIdx){
   const html=`<span style="position:relative;display:inline-block">${shapeSvg(cat,color,'lg')}${badges}</span>`;
   return L.divIcon({html,iconSize:[20,20],iconAnchor:[10,10],popupAnchor:[0,-10],className:''});
 }
+function isMergedIntoBanned(locIdx){
+  for(const [ti,tm] of Object.entries(TRAIL_META)){
+    if(tm.includes&&tm.includes.includes(locIdx)&&favs[+ti]&&favs[+ti].banned)return true;
+  }
+  return false;
+}
 function markerVisible(m){
+  if(isMergedIntoBanned(m._locIdx))return false;
   if(activeFilter==='all')return true;
   if(activeFilter==='starred')return favs[m._locIdx]&&favs[m._locIdx].starred;
   if(activeFilter==='hearted')return favs[m._locIdx]&&favs[m._locIdx].hearted;
@@ -955,12 +962,14 @@ function updateMapPopups(){
     const code=d.daily.weathercode[di],hi=Math.round(d.daily.temperature_2m_max[di]),lo=Math.round(d.daily.temperature_2m_min[di]);
     const prob=d.daily.precipitation_probability_max[di],elev=Math.round(d.elevation),desc=WEATHER_DESC[code]||'';
     const wind=locWind(m._locIdx,di),sc=locScore(m._locIdx,di);
+    const tm=TRAIL_META[m._locIdx];
     m.bindPopup(
       `<div class="popup-name">${esc(loc.name)}</div>
       <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${elev.toLocaleString('pl-PL')} m · score ${sc}</div>
       <div class="popup-weather">${weatherIcon(code)}<span class="popup-temp">${hi}°/${lo}°</span> ${desc}</div>
       ${prob>15?`<div style="margin-top:3px;font-size:11px;color:var(--accent)">Opady: ${prob}%</div>`:''}
-      ${wind>20?`<div style="font-size:11px;color:var(--text2)">Wiatr: ${Math.round(wind)} km/h</div>`:''}`,
+      ${wind>20?`<div style="font-size:11px;color:var(--text2)">Wiatr: ${Math.round(wind)} km/h</div>`:''}
+      ${tm?`<div style="margin-top:4px"><a href="https://www.alltrails.com/${tm.slug}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;font-weight:500">AllTrails →</a></div>`:''}`,
       {closeButton:false,offset:[0,-4]});
   });
 }
