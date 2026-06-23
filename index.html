@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dolomity 2026</title>
+  <title>Pogoda</title>
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
@@ -247,7 +247,10 @@
 
 <header class="header">
   <div class="header-top">
-    <h1 class="title">Dolomity 2026</h1>
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+      <h1 class="title" id="appTitle"></h1>
+      <select id="collectionPicker" style="font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;background:var(--bg);color:var(--text2);cursor:pointer;max-width:140px"></select>
+    </div>
     <div class="header-btns">
       <button class="icon-btn" id="settingsBtn" title="Ustawienia scoringu">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
@@ -262,9 +265,9 @@
 
 <main>
   <div class="map-wrap"><div class="map-container" id="map"></div></div>
-  <div class="tabs">
+  <div class="tabs" id="tabsEl">
     <button class="tab active" data-tab="weather">Pogoda</button>
-    <button class="tab" data-tab="planner">Planer wycieczki</button>
+    <button class="tab" data-tab="planner" id="plannerTab">Planer wycieczki</button>
   </div>
   <div id="weatherView">
     <div class="day-picker" id="dayPicker"></div>
@@ -291,92 +294,12 @@
 </div>
 
 <script>
-const LOCATIONS = [
-  { name: 'SnowLake Suite — Alleghe', lat: 46.4073, lon: 12.0240, cat: 'stay' },
-  { name: 'Canazei', lat: 46.4767, lon: 11.7706, cat: 'stay' },
-  { name: 'Passo Giau', lat: 46.4831, lon: 12.0542, cat: 'peak' },
-  { name: 'Seceda', lat: 46.5981, lon: 11.7242, cat: 'peak' },
-  { name: 'Sassolungo / Langkofel', lat: 46.5247, lon: 11.7353, cat: 'peak' },
-  { name: 'Forcella Sassolungo', lat: 46.5090, lon: 11.7559, cat: 'peak' },
-  { name: 'Cima Pisciadù', lat: 46.5314, lon: 11.8246, cat: 'peak' },
-  { name: 'Lagazuoi', lat: 46.5297, lon: 12.0030, cat: 'peak' },
-  { name: 'Forcella Travenanzes', lat: 46.5309, lon: 12.0200, cat: 'peak' },
-  { name: 'Tofana di Rozes', lat: 46.5371, lon: 12.0518, cat: 'peak' },
-  { name: 'Cadini di Misurina', lat: 46.5793, lon: 12.2872, cat: 'peak' },
-  { name: 'Tre Cime di Lavaredo', lat: 46.6187, lon: 12.3028, cat: 'peak' },
-  { name: 'Paternkofel', lat: 46.6253, lon: 12.3153, cat: 'peak' },
-  { name: 'Monte Pelmo', lat: 46.4206, lon: 12.1346, cat: 'peak' },
-  { name: 'Karersee / Lago di Carezza', lat: 46.4092, lon: 11.5751, cat: 'lake' },
-  { name: 'Lago Lagazuoi', lat: 46.5536, lon: 12.0056, cat: 'lake' },
-  { name: 'Lago di Sorapis', lat: 46.5561, lon: 12.2046, cat: 'lake' },
-  { name: 'Pragser Wildsee / Lago di Braies', lat: 46.6943, lon: 12.0854, cat: 'lake' },
-  { name: 'Seiser Alm / Alpe di Siusi', lat: 46.5423, lon: 11.6169, cat: 'valley' },
-  { name: 'Val di Funes', lat: 46.6395, lon: 11.6742, cat: 'valley' },
-  { name: 'Geisleralm', lat: 46.6210, lon: 11.7495, cat: 'valley' },
-  { name: 'Vallunga / Langental', lat: 46.5647, lon: 11.7775, cat: 'valley' },
-  { name: 'Cortina d\'Ampezzo', lat: 46.5378, lon: 12.1359, cat: 'valley' },
-  { name: 'Col Raiser–Secëda–Forcella Pana', lat: 46.58478, lon: 11.74532, cat: 'trail' },
-  { name: 'Seceda–Pieralongia Hut', lat: 46.5978, lon: 11.72448, cat: 'trail' },
-  { name: 'Seceda–Pieralongia–Firenze–Troier', lat: 46.59792, lon: 11.72436, cat: 'trail' },
-  { name: 'Tre Cime di Lavaredo–Laghi dei Piani', lat: 46.61241, lon: 12.29539, cat: 'trail' },
-  { name: 'Lake Braies Loop', lat: 46.69977, lon: 12.08526, cat: 'trail' },
-  { name: 'Alpe di Siusi–Ortisei', lat: 46.55805, lon: 11.66471, cat: 'trail' },
-  { name: 'Lagazuoi–Cinque Torri (Alta Via 1)', lat: 46.52764, lon: 12.0082, cat: 'trail' },
-  { name: 'Cadini di Misurina via Auronzo', lat: 46.61225, lon: 12.29641, cat: 'trail' },
-  { name: 'Lago di Carezza–Lago di Mezzo', lat: 46.41034, lon: 11.57584, cat: 'trail' },
-  { name: 'Lake Sorapis via Rifugio Cristallo', lat: 46.54686, lon: 12.24856, cat: 'trail' },
-  { name: 'Lake Sorapiss–Passo Tre Croci loop', lat: 46.5468, lon: 12.24871, cat: 'trail' },
-  { name: 'Forcella Ambrizzola via Lago Fedèra', lat: 46.50583, lon: 12.07844, cat: 'trail' },
-  { name: 'Three Peaks of Lavaredo', lat: 46.61223, lon: 12.29642, cat: 'trail' },
-  { name: 'Lake Sorapis via Passo Tre Croci', lat: 46.55614, lon: 12.20462, cat: 'trail' },
-  { name: 'Adolf Munkel Trail', lat: 46.63579, lon: 11.7658, cat: 'trail' },
-  { name: 'Cinque Torri Loop', lat: 46.50849, lon: 12.05564, cat: 'trail' },
-  { name: 'Cinque Torri via Baita Bai de Dones', lat: 46.51866, lon: 12.03814, cat: 'trail' },
-  { name: 'Monte Piz–Schgaguler via Monte Sëuc', lat: 46.55804, lon: 11.6647, cat: 'trail' },
-];
+let LOCATIONS=[], TRAIL_META={}, MERGED_SPOTS=new Set(), TRAIL_GROUPS={};
+let CATS={}, COLLECTION_ID='', COLLECTION_TZ='Europe/Rome';
+let TRIP_ORIGIN=null, TRIP_DAYS=[];
 
-const TRAIL_META = {
-  23:{km:10.0,gain:553,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:2075,slug:'trail/italy/south-tyrol/col-raiser-seceda-forcella-pana-rifugio-firenze',
-    includes:[3],pois:[[46.6020249,11.7431804],[46.6005922,11.7257836],[46.5987964,11.740451],[46.5875127,11.7583093]]},
-  24:{km:5.5,gain:322,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:996,slug:'trail/italy/south-tyrol/seceda-malga-pieralongia',
-    includes:[3],pois:[[46.6005922,11.7257836],[46.5987964,11.740451]]},
-  25:{km:10.1,gain:570,high:2517,diff:'moderate',type:'loop',rating:4.8,reviews:1172,slug:'trail/italy/south-tyrol/seceda-malga-pieralongia-rifugio-firenze-baita-troier',
-    includes:[3],pois:[[46.6005922,11.7257836],[46.5960406,11.7431999],[46.5987964,11.740451],[46.5875127,11.7583093]]},
-  26:{km:11.4,gain:597,high:2481,diff:'moderate',type:'loop',rating:4.8,reviews:984,slug:'trail/italy/veneto/tre-cime-di-lavaredo-laghi-dei-piani',
-    includes:[11],pois:[[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6136422,12.3062679],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6386414,12.3154759],[46.6127831,12.2927184],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6389935,12.3082242],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]},
-  27:{km:3.9,gain:189,high:1582,diff:'moderate',type:'loop',rating:4.7,reviews:2996,slug:'trail/italy/south-tyrol/lago-di-braies-pragser-wildsee',
-    includes:[17],pois:[[46.6888277,12.0878869],[46.6937425,12.084913],[46.7119341,12.0961553],[46.6988558,12.0132509]]},
-  28:{km:5.5,gain:18,high:2007,diff:'moderate',type:'point to point',rating:4.7,reviews:162,slug:'trail/italy/south-tyrol/alpe-di-siusi-ortisei',
-    includes:[18],pois:[[46.5587949,11.670502],[46.5593872,11.7055514],[46.5577857,11.7276892]]},
-  29:{km:11.6,gain:522,high:2732,diff:'moderate',type:'point to point',rating:4.8,reviews:22,slug:'trail/italy/veneto/rifugio-lagazuoi-rifugio-cinque-torri',
-    includes:[7],pois:[[46.5095798,12.0519072],[46.5373107,12.0587132],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5304689,12.0216286],[46.5343831,12.0554647],[46.5082178,12.054733],[46.5277379,12.0081182],[46.5323971,12.0699062]]},
-  30:{km:3.5,gain:206,high:2359,diff:'moderate',type:'out & back',rating:4.8,reviews:2873,slug:'trail/italy/veneto/rifugio-auronzo-cadini-di-misurina',
-    includes:[10],pois:[[46.6024839,12.2976006],[46.6009257,12.2954732],[46.6122047,12.2960952]]},
-  31:{km:4.3,gain:173,high:1684,diff:'moderate',type:'loop',rating:4.5,reviews:499,slug:'trail/italy/south-tyrol/lago-di-carezza-lago-di-mezzo',
-    includes:[14],pois:[[46.408937,11.5736492],[46.4032417,11.5796126],[46.4101552,11.5759371]]},
-  32:{km:9.5,gain:714,high:1940,diff:'hard',type:'out & back',rating:4.7,reviews:793,slug:'trail/italy/veneto/lago-di-sorapis-via-trail-217',
-    includes:[16],pois:[[46.5205489,12.2232393],[46.521673,12.2266189]]},
-  33:{km:15.0,gain:866,high:1937,diff:'hard',type:'loop',rating:4.6,reviews:197,slug:'trail/italy/veneto/rifugio-cristallo-lago-sorapis-rifugio-vandelli-passo-tre-croci',
-    includes:[16],pois:[[46.5205489,12.2232393],[46.521673,12.2266189]]},
-  34:{km:13.0,gain:912,high:2475,diff:'hard',type:'loop',rating:4.8,reviews:616,slug:'trail/italy/veneto/croda-da-lago-lago-federa-forcella-ambrizzola',
-    pois:[[46.4791667,12.0980556],[46.4881988,12.0968015],[46.5067321,12.0887625],[46.4817466,12.0979804],[46.4841642,12.0977551],[46.4833294,12.0974895],[46.4827975,12.0979737],[46.488204,12.1018267],[46.4881011,12.1043606],[46.5016147,12.0536175],[46.4865062,12.1057495],[46.4824521,12.0980018]]},
-  35:{km:10.1,gain:493,high:2481,diff:'moderate',type:'loop',rating:4.8,reviews:6212,slug:'trail/italy/veneto/tre-cime-di-lavaredo-drei-zinnen',
-    includes:[11,12],pois:[[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6389935,12.3082242],[46.6136422,12.3062679],[46.6127831,12.2927184],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]},
-  36:{km:12.7,gain:598,high:1943,diff:'hard',type:'out & back',rating:4.7,reviews:4628,slug:'trail/italy/veneto/passo-tre-croci-lago-sorapis',
-    includes:[16],pois:[[46.5205489,12.2232393],[46.521673,12.2266189]]},
-  37:{km:9.7,gain:466,high:2037,diff:'moderate',type:'loop',rating:4.8,reviews:2788,slug:'trail/italy/south-tyrol/via-delle-odle-zanser-alm-rifugio-delle-odle-malga-dusler',
-    includes:[19,20],pois:[[46.6476368,11.6193826]]},
-  38:{km:2.1,gain:118,high:2250,diff:'moderate',type:'loop',rating:4.8,reviews:707,slug:'trail/italy/veneto/giro-cinque-torri',
-    pois:[[46.5097764,12.0522889],[46.5095798,12.0519072],[46.509674,12.0521257],[46.5090754,12.0518683],[46.5105012,12.0514722],[46.5103332,12.0511933],[46.5106914,12.0509157],[46.5098911,12.0508191],[46.5100785,12.0490605],[46.5082178,12.054733],[46.5080886,12.0467715]]},
-  39:{km:6.9,gain:414,high:2273,diff:'moderate',type:'loop',rating:4.6,reviews:1216,slug:'trail/italy/veneto/baita-bai-de-dones-cinque-torri',
-    pois:[[46.5095798,12.0519072],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5194816,12.0410153],[46.5105012,12.0514722],[46.5103332,12.0511933],[46.5106914,12.0509157],[46.5098911,12.0508191],[46.5082178,12.054733],[46.5080886,12.0467715]]},
-  40:{km:7.7,gain:243,high:2019,diff:'moderate',type:'loop',rating:4.7,reviews:873,slug:'trail/italy/south-tyrol/monte-seuc-piz-schgaguler-schwaige',
-    includes:[18],pois:[[46.5587949,11.670502],[46.5581918,11.6539529],[46.5484452,11.6488402]]},
-};
-
-const MERGED_SPOTS=new Set();
-const TRAIL_GROUPS={};
-(function(){
+function computeMergedSpots(){
+  MERGED_SPOTS=new Set();TRAIL_GROUPS={};
   const s2t={};
   Object.entries(TRAIL_META).forEach(([idx,m])=>{
     if(!m.includes)return;
@@ -389,9 +312,22 @@ const TRAIL_GROUPS={};
     if(g===null)g=gid++;
     trails.forEach(t=>{TRAIL_GROUPS[t]=g});
   });
-})();
+}
 
-const CATS = { all:'Wszystko', starred:'Gwiazdki', hearted:'Serca', stay:'Noclegi', peak:'Szczyty', lake:'Jeziora', valley:'Doliny', trail:'Trasy' };
+async function loadCollection(id){
+  const resp=await fetch(`collections/${id}.json`);
+  const col=await resp.json();
+  COLLECTION_ID=col.id;
+  LOCATIONS=col.locations;
+  TRAIL_META=col.trailMeta||{};
+  CATS={all:'Wszystko',starred:'Gwiazdki',hearted:'Serca',...col.categories};
+  COLLECTION_TZ=col.timezone||'Europe/Rome';
+  if(col.trip){TRIP_ORIGIN=col.trip.origin;TRIP_DAYS=col.trip.days||[]}
+  else{TRIP_ORIGIN=null;TRIP_DAYS=[]}
+  computeMergedSpots();
+  $('appTitle').textContent=col.name;
+  document.title=col.name;
+}
 const DAY_NAMES = ['Nd','Pn','Wt','Śr','Cz','Pt','So'];
 const WEATHER_DESC = {
   0:'Bezchmurnie',1:'Prawie bezchmurnie',2:'Częściowe zachmurzenie',
@@ -422,11 +358,13 @@ function weatherIcon(code){
 }
 
 /* Shapes */
-const SH_SM={stay:'<rect x="1" y="1" width="6" height="6" rx="1.5"/>',peak:'<polygon points="4,0.5 7.5,7.5 0.5,7.5"/>',lake:'<circle cx="4" cy="4" r="3.5"/>',valley:'<polygon points="4,0.5 7.5,4 4,7.5 0.5,4"/>',trail:'<polygon points="4,0.5 7,2 7,6 4,7.5 1,6 1,2"/>'};
-const SH_LG={stay:'<rect x="3" y="3" width="14" height="14" rx="3"/>',peak:'<polygon points="10,2 18,17 2,17"/>',lake:'<circle cx="10" cy="10" r="7.5"/>',valley:'<polygon points="10,2 18,10 10,18 2,10"/>',trail:'<polygon points="10,2 17,5.5 17,14.5 10,18 3,14.5 3,5.5"/>'};
+const SH_SM={stay:'<rect x="1" y="1" width="6" height="6" rx="1.5"/>',home:'<rect x="1" y="1" width="6" height="6" rx="1.5"/>',peak:'<polygon points="4,0.5 7.5,7.5 0.5,7.5"/>',lake:'<circle cx="4" cy="4" r="3.5"/>',valley:'<polygon points="4,0.5 7.5,4 4,7.5 0.5,4"/>',trail:'<polygon points="4,0.5 7,2 7,6 4,7.5 1,6 1,2"/>',beach:'<polygon points="0.5,7.5 4,0.5 7.5,7.5 4,5"/>',camping:'<polygon points="4,0.5 7.5,7.5 0.5,7.5"/>',playground:'<rect x="1" y="1" width="6" height="6"/>',restaurant:'<polygon points="4,0.5 7.5,4 4,7.5 0.5,4"/>',viewpoint:'<polygon points="4,0.5 7,2 7,6 4,7.5 1,6 1,2"/>',morze:'<circle cx="4" cy="4" r="3.5"/>'};
+const SH_LG={stay:'<rect x="3" y="3" width="14" height="14" rx="3"/>',home:'<rect x="3" y="3" width="14" height="14" rx="3"/>',peak:'<polygon points="10,2 18,17 2,17"/>',lake:'<circle cx="10" cy="10" r="7.5"/>',valley:'<polygon points="10,2 18,10 10,18 2,10"/>',trail:'<polygon points="10,2 17,5.5 17,14.5 10,18 3,14.5 3,5.5"/>',beach:'<polygon points="2,17 10,2 18,17 10,12"/>',camping:'<polygon points="10,2 18,17 2,17"/>',playground:'<rect x="3" y="3" width="14" height="14"/>',restaurant:'<polygon points="10,2 18,10 10,18 2,10"/>',viewpoint:'<polygon points="10,2 17,5.5 17,14.5 10,18 3,14.5 3,5.5"/>',morze:'<circle cx="10" cy="10" r="7.5"/>'};
+const SH_DEFAULT_SM='<circle cx="4" cy="4" r="3.5"/>';
+const SH_DEFAULT_LG='<circle cx="10" cy="10" r="7.5"/>';
 function shapeSvg(cat,fill,sz){
-  if(sz==='lg')return`<svg width="20" height="20" viewBox="0 0 20 20" fill="${fill}" stroke="#fff" stroke-width="2">${SH_LG[cat]}</svg>`;
-  return`<svg width="8" height="8" viewBox="0 0 8 8" fill="${fill}" class="cat-shape">${SH_SM[cat]}</svg>`;
+  if(sz==='lg')return`<svg width="20" height="20" viewBox="0 0 20 20" fill="${fill}" stroke="#fff" stroke-width="2">${SH_LG[cat]||SH_DEFAULT_LG}</svg>`;
+  return`<svg width="8" height="8" viewBox="0 0 8 8" fill="${fill}" class="cat-shape">${SH_SM[cat]||SH_DEFAULT_SM}</svg>`;
 }
 
 /* ---- Settings ---- */
@@ -455,8 +393,8 @@ function defaultSettings(){
   return s;
 }
 let settings=defaultSettings();
-function loadSettings(){try{const r=localStorage.getItem('dol26s');if(r)settings={...defaultSettings(),...JSON.parse(r)}}catch{}}
-function saveSettings(){try{localStorage.setItem('dol26s',JSON.stringify(settings))}catch{}}
+function loadSettings(){try{const r=localStorage.getItem('app_settings');if(r)settings={...defaultSettings(),...JSON.parse(r)}}catch{}}
+function saveSettings(){try{localStorage.setItem('app_settings',JSON.stringify(settings))}catch{}}
 
 /* ---- Scoring ---- */
 function codeGroup(c){
@@ -480,7 +418,6 @@ function sColor(sc){if(sc>=settings.threshGood)return'var(--good)';if(sc>=settin
 function sColorRaw(sc){if(sc>=settings.threshGood)return'#10B981';if(sc>=settings.threshOk)return'#F59E0B';return'#EF4444'}
 
 /* ---- Favorites (star, heart, url) ---- */
-const FAV_KEY='dol26fav';
 let favs={};
 function loadFavs(){try{const r=localStorage.getItem(FAV_KEY);if(r)favs=JSON.parse(r)}catch{}}
 function saveFavs(){try{localStorage.setItem(FAV_KEY,JSON.stringify(favs))}catch{}}
@@ -559,7 +496,12 @@ function trailMetaRow(idx){
 }
 
 /* ---- State ---- */
-const CACHE_KEY='dol26w6';
+let CACHE_KEY='',FAV_KEY='',PLAN_KEY='';
+function initStorageKeys(){
+  CACHE_KEY=COLLECTION_ID+'_w';FAV_KEY=COLLECTION_ID+'_fav';PLAN_KEY=COLLECTION_ID+'_plan';
+  migrate('dol26fav',FAV_KEY);migrate('dol26plan',PLAN_KEY);migrate('dol26s','app_settings');migrate('dol26w6',CACHE_KEY);
+}
+function migrate(old,nw){try{if(!localStorage.getItem(nw)&&localStorage.getItem(old)){localStorage.setItem(nw,localStorage.getItem(old));localStorage.removeItem(old)}}catch{}}
 const CACHE_TTL=30*60*1000;
 let weatherData=null,cacheTime=null,activeFilter='all',selectedDay=null,map,markers=[];
 let trailPoiLayer=null,activeTrailIdx=null;
@@ -570,7 +512,7 @@ const updatedEl=$('updated'),dayPickerEl=$('dayPicker'),legendEl=$('legend');
 const settingsBtn=$('settingsBtn'),settingsOverlay=$('settingsOverlay'),settingsClose=$('settingsClose'),settingsBody=$('settingsBody');
 
 /* ---- Helpers ---- */
-function todayStr(){return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'})}
+function todayStr(){return new Date().toLocaleDateString('sv-SE',{timeZone:COLLECTION_TZ})}
 function todayIdx(){if(!weatherData||!weatherData[0])return 0;const i=weatherData[0].daily.time.indexOf(todayStr());return i>=0?i:0}
 function dayName(ds){const p=ds.split('-');return DAY_NAMES[new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()]}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -583,6 +525,7 @@ function getCache(allowStale){
   try{
     const r=localStorage.getItem(CACHE_KEY);if(!r)return null;
     const c=JSON.parse(r);
+    if(c.data.length!==LOCATIONS.length)return null;
     if(allowStale)return c;
     if(Date.now()-c.ts>CACHE_TTL)return null;
     if(c.data[0]&&!c.data[0].daily.time.includes(todayStr()))return null;
@@ -593,7 +536,7 @@ function setCache(data){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Da
 
 /* ---- API ---- */
 async function fetchOne(lat,lon){
-  const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max&timezone=Europe/Rome&forecast_days=8`;
+  const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,windspeed_10m_max&timezone=${encodeURIComponent(COLLECTION_TZ)}&forecast_days=8`;
   const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json();
 }
 async function fetchWithRetry(lat,lon,retries=2){
@@ -819,16 +762,9 @@ function avgDayScore(di){
   return n?t/n:50;
 }
 function renderLegend(){
-  legendEl.innerHTML=`
-    <span class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>Dobra</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--ok)"></span>Umiark.</span>
-    <span class="legend-item"><span class="legend-dot" style="background:var(--bad)"></span>Słaba</span>
-    <span style="color:var(--border)">|</span>
-    <span class="legend-item">${shapeSvg('stay','var(--text2)','sm')}Nocleg</span>
-    <span class="legend-item">${shapeSvg('peak','var(--text2)','sm')}Szczyt</span>
-    <span class="legend-item">${shapeSvg('lake','var(--text2)','sm')}Jezioro</span>
-    <span class="legend-item">${shapeSvg('valley','var(--text2)','sm')}Dolina</span>
-    <span class="legend-item">${shapeSvg('trail','var(--text2)','sm')}Trasa</span>`;
+  const weather=`<span class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>Dobra</span><span class="legend-item"><span class="legend-dot" style="background:var(--ok)"></span>Umiark.</span><span class="legend-item"><span class="legend-dot" style="background:var(--bad)"></span>Słaba</span>`;
+  const cats=Object.entries(CATS).filter(([k])=>k!=='all'&&k!=='starred'&&k!=='hearted').map(([k,label])=>`<span class="legend-item">${shapeSvg(k,'var(--text2)','sm')}${label}</span>`).join('');
+  legendEl.innerHTML=weather+'<span style="color:var(--border)">|</span>'+cats;
 }
 dayPickerEl.addEventListener('click',e=>{const b=e.target.closest('.dpick');if(!b)return;const d=parseInt(b.dataset.day);selectedDay=selectedDay===d?null:d;renderDayPicker();render();updateMapAll()});
 
@@ -1012,17 +948,7 @@ document.querySelector('.tabs').addEventListener('click',e=>{
 });
 
 /* ---- Trip Planner ---- */
-const VERONA={lat:45.4384,lon:10.9917};
-const TRIP_DAYS=[
-  {date:'2026-05-12',accomIdx:0,note:'Przyjazd z Werony ~11:00',max:2},
-  {date:'2026-05-13',accomIdx:0,max:3},
-  {date:'2026-05-14',accomIdx:0,max:3},
-  {date:'2026-05-15',accomIdx:1,max:3},
-  {date:'2026-05-16',accomIdx:1,max:3},
-  {date:'2026-05-17',accomIdx:1,max:3},
-  {date:'2026-05-18',accomIdx:-1,note:'Powrót do Werony',max:2},
-];
-const PLAN_KEY='dol26plan';
+const MONTHS_GEN=['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
 let plan={};
 function loadPlan(){try{const r=localStorage.getItem(PLAN_KEY);if(r)plan=JSON.parse(r)}catch{}}
 function savePlan(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(plan))}catch{}}
@@ -1048,12 +974,13 @@ function planComposite(locIdx,tripDay){
   const loc=LOCATIONS[locIdx];
   let accomLat,accomLon;
   if(td.accomIdx>=0){accomLat=LOCATIONS[td.accomIdx].lat;accomLon=LOCATIONS[td.accomIdx].lon}
-  else{accomLat=VERONA.lat;accomLon=VERONA.lon}
+  else if(TRIP_ORIGIN){accomLat=TRIP_ORIGIN.lat;accomLon=TRIP_ORIGIN.lon}
+  else return ws;
   const dist=haversine(loc.lat,loc.lon,accomLat,accomLon);
   let distPen=Math.min(15,Math.max(0,(dist-20)*0.3));
   if(tripDay===0||tripDay===6){
-    const base=tripDay===0?VERONA:{lat:LOCATIONS[1].lat,lon:LOCATIONS[1].lon};
-    const dest=tripDay===0?{lat:LOCATIONS[0].lat,lon:LOCATIONS[0].lon}:VERONA;
+    const base=tripDay===0?TRIP_ORIGIN:{lat:LOCATIONS[1].lat,lon:LOCATIONS[1].lon};
+    const dest=tripDay===0?{lat:LOCATIONS[0].lat,lon:LOCATIONS[0].lon}:TRIP_ORIGIN;
     const direct=haversine(base.lat,base.lon,dest.lat,dest.lon);
     const detour=haversine(base.lat,base.lon,loc.lat,loc.lon)+haversine(loc.lat,loc.lon,dest.lat,dest.lon)-direct;
     distPen=Math.min(25,Math.max(0,detour*0.4));
@@ -1165,7 +1092,7 @@ function renderPlanner(){
     const dateObj=td.date.split('-');
     const dayLabel=DAY_NAMES[new Date(Date.UTC(+dateObj[0],+dateObj[1]-1,+dateObj[2])).getUTCDay()];
     const num=parseInt(dateObj[2]);
-    const accomName=td.accomIdx>=0?LOCATIONS[td.accomIdx].name:'Werona';
+    const accomName=td.accomIdx>=0?LOCATIONS[td.accomIdx].name:(TRIP_ORIGIN?TRIP_ORIGIN.name:'');
 
     const items=(plan[di]||[]).map(li=>{
       const loc=LOCATIONS[li];
@@ -1198,7 +1125,7 @@ function renderPlanner(){
     h+=`<div class="plan-day">
       <div class="plan-day-head">
         <div class="plan-day-left">
-          <span class="plan-day-date">${dayLabel}, ${num} maja</span>
+          <span class="plan-day-date">${dayLabel}, ${num} ${MONTHS_GEN[parseInt(dateObj[1])-1]}</span>
           <span class="plan-day-accom">🏠 ${esc(accomName)}</span>
           ${td.note?`<span class="plan-day-note">${td.note}</span>`:''}
         </div>
@@ -1236,8 +1163,9 @@ function planAddBestToDay(dayIdx){
 
 /* ---- Service Worker & tile pre-cache ---- */
 function precacheTiles(){
-  if(!navigator.serviceWorker||!navigator.serviceWorker.controller)return;
-  const bbox={latMin:46.3,latMax:46.75,lonMin:11.5,lonMax:12.4};
+  if(!navigator.serviceWorker||!navigator.serviceWorker.controller||!LOCATIONS.length)return;
+  const lats=LOCATIONS.map(l=>l.lat),lons=LOCATIONS.map(l=>l.lon);
+  const bbox={latMin:Math.min(...lats)-0.05,latMax:Math.max(...lats)+0.05,lonMin:Math.min(...lons)-0.05,lonMax:Math.max(...lons)+0.05};
   const urls=[];
   for(let z=10;z<=13;z++){
     const xMin=lon2tile(bbox.lonMin,z),xMax=lon2tile(bbox.lonMax,z);
@@ -1260,13 +1188,53 @@ if('serviceWorker' in navigator){
 window.addEventListener('online',()=>{updateTimestamp();loadWeather()});
 window.addEventListener('offline',()=>updateTimestamp());
 
+/* ---- Collection switcher ---- */
+let COLLECTIONS_INDEX=[];
+async function switchCollection(id){
+  await loadCollection(id);
+  initStorageKeys();
+  $('plannerTab').style.display=TRIP_DAYS.length?'':'none';
+  loadFavs();
+  loadPlan();
+  favs={};loadFavs();
+  plan={};loadPlan();
+  weatherData=null;cacheTime=null;activeFilter='all';selectedDay=null;
+  if(trailPoiLayer){map.removeLayer(trailPoiLayer);trailPoiLayer=null;activeTrailIdx=null}
+  markers.forEach(m=>map.removeLayer(m));markers=[];
+  LOCATIONS.forEach((loc,i)=>{const m=L.marker([loc.lat,loc.lon],{icon:mkIcon(loc.cat,'#9CA3AF',i)}).addTo(map);m._locIdx=i;m._cat=loc.cat;if(loc.cat==='trail')m.on('click',()=>toggleTrailPois(i));markers.push(m)});
+  fitMapBounds();
+  renderFilters();
+  renderDayPicker();
+  render();
+  loadWeather();
+  try{localStorage.setItem('lastCollection',id)}catch{}
+  const picker=$('collectionPicker');if(picker.value!==id)picker.value=id;
+}
+
 /* ---- Init ---- */
-loadFavs();
-loadPlan();
-loadSettings();
-initMap();
-renderFilters();
-loadWeather();
+(async function(){
+  let colIdx;
+  try{colIdx=await fetch('collections/index.json').then(r=>r.json())}catch{colIdx={collections:[{id:'dolomity-2026',name:'Dolomity 2026'}],default:'dolomity-2026'}}
+  COLLECTIONS_INDEX=colIdx.collections;
+  const picker=$('collectionPicker');
+  COLLECTIONS_INDEX.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;picker.appendChild(o)});
+  const params=new URLSearchParams(location.search);
+  let colId=params.get('c');
+  if(!colId)try{colId=localStorage.getItem('lastCollection')}catch{}
+  if(!colId||!COLLECTIONS_INDEX.find(c=>c.id===colId))colId=colIdx.default;
+  picker.value=colId;
+  picker.addEventListener('change',()=>switchCollection(picker.value));
+  await loadCollection(colId);
+  initStorageKeys();
+  $('plannerTab').style.display=TRIP_DAYS.length?'':'none';
+  loadFavs();
+  loadPlan();
+  loadSettings();
+  initMap();
+  renderFilters();
+  loadWeather();
+  try{localStorage.setItem('lastCollection',colId)}catch{}
+})();
 </script>
 </body>
 </html>

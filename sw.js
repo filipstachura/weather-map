@@ -1,4 +1,4 @@
-const CACHE='dol26-v1';
+const CACHE='weather-v3';
 const CDN_ASSETS=[
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',

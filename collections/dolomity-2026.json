@@ -1,0 +1,192 @@
+{
+  "id": "dolomity-2026",
+  "name": "Dolomity 2026",
+  "timezone": "Europe/Rome",
+  "categories": {
+    "stay": "Noclegi",
+    "peak": "Szczyty",
+    "lake": "Jeziora",
+    "valley": "Doliny",
+    "trail": "Trasy"
+  },
+  "locations": [
+    { "name": "SnowLake Suite — Alleghe", "lat": 46.4073, "lon": 12.0240, "cat": "stay" },
+    { "name": "Canazei", "lat": 46.4767, "lon": 11.7706, "cat": "stay" },
+    { "name": "Passo Giau", "lat": 46.4831, "lon": 12.0542, "cat": "peak" },
+    { "name": "Seceda", "lat": 46.5981, "lon": 11.7242, "cat": "peak" },
+    { "name": "Sassolungo / Langkofel", "lat": 46.5247, "lon": 11.7353, "cat": "peak" },
+    { "name": "Forcella Sassolungo", "lat": 46.5090, "lon": 11.7559, "cat": "peak" },
+    { "name": "Cima Pisciadù", "lat": 46.5314, "lon": 11.8246, "cat": "peak" },
+    { "name": "Lagazuoi", "lat": 46.5297, "lon": 12.0030, "cat": "peak" },
+    { "name": "Forcella Travenanzes", "lat": 46.5309, "lon": 12.0200, "cat": "peak" },
+    { "name": "Tofana di Rozes", "lat": 46.5371, "lon": 12.0518, "cat": "peak" },
+    { "name": "Cadini di Misurina", "lat": 46.5793, "lon": 12.2872, "cat": "peak" },
+    { "name": "Tre Cime di Lavaredo", "lat": 46.6187, "lon": 12.3028, "cat": "peak" },
+    { "name": "Paternkofel", "lat": 46.6253, "lon": 12.3153, "cat": "peak" },
+    { "name": "Monte Pelmo", "lat": 46.4206, "lon": 12.1346, "cat": "peak" },
+    { "name": "Karersee / Lago di Carezza", "lat": 46.4092, "lon": 11.5751, "cat": "lake" },
+    { "name": "Lago Lagazuoi", "lat": 46.5536, "lon": 12.0056, "cat": "lake" },
+    { "name": "Lago di Sorapis", "lat": 46.5561, "lon": 12.2046, "cat": "lake" },
+    { "name": "Pragser Wildsee / Lago di Braies", "lat": 46.6943, "lon": 12.0854, "cat": "lake" },
+    { "name": "Seiser Alm / Alpe di Siusi", "lat": 46.5423, "lon": 11.6169, "cat": "valley" },
+    { "name": "Val di Funes", "lat": 46.6395, "lon": 11.6742, "cat": "valley" },
+    { "name": "Geisleralm", "lat": 46.6210, "lon": 11.7495, "cat": "valley" },
+    { "name": "Vallunga / Langental", "lat": 46.5647, "lon": 11.7775, "cat": "valley" },
+    { "name": "Cortina d'Ampezzo", "lat": 46.5378, "lon": 12.1359, "cat": "valley" },
+    { "name": "Col Raiser–Secëda–Forcella Pana", "lat": 46.58478, "lon": 11.74532, "cat": "trail" },
+    { "name": "Seceda–Pieralongia Hut", "lat": 46.5978, "lon": 11.72448, "cat": "trail" },
+    { "name": "Seceda–Pieralongia–Firenze–Troier", "lat": 46.59792, "lon": 11.72436, "cat": "trail" },
+    { "name": "Tre Cime di Lavaredo–Laghi dei Piani", "lat": 46.61241, "lon": 12.29539, "cat": "trail" },
+    { "name": "Lake Braies Loop", "lat": 46.69977, "lon": 12.08526, "cat": "trail" },
+    { "name": "Alpe di Siusi–Ortisei", "lat": 46.55805, "lon": 11.66471, "cat": "trail" },
+    { "name": "Lagazuoi–Cinque Torri (Alta Via 1)", "lat": 46.52764, "lon": 12.0082, "cat": "trail" },
+    { "name": "Cadini di Misurina via Auronzo", "lat": 46.61225, "lon": 12.29641, "cat": "trail" },
+    { "name": "Lago di Carezza–Lago di Mezzo", "lat": 46.41034, "lon": 11.57584, "cat": "trail" },
+    { "name": "Lake Sorapis via Rifugio Cristallo", "lat": 46.54686, "lon": 12.24856, "cat": "trail" },
+    { "name": "Lake Sorapiss–Passo Tre Croci loop", "lat": 46.5468, "lon": 12.24871, "cat": "trail" },
+    { "name": "Forcella Ambrizzola via Lago Fedèra", "lat": 46.50583, "lon": 12.07844, "cat": "trail" },
+    { "name": "Three Peaks of Lavaredo", "lat": 46.61223, "lon": 12.29642, "cat": "trail" },
+    { "name": "Lake Sorapis via Passo Tre Croci", "lat": 46.55614, "lon": 12.20462, "cat": "trail" },
+    { "name": "Adolf Munkel Trail", "lat": 46.63579, "lon": 11.7658, "cat": "trail" },
+    { "name": "Cinque Torri Loop", "lat": 46.50849, "lon": 12.05564, "cat": "trail" },
+    { "name": "Cinque Torri via Baita Bai de Dones", "lat": 46.51866, "lon": 12.03814, "cat": "trail" },
+    { "name": "Monte Piz–Schgaguler via Monte Sëuc", "lat": 46.55804, "lon": 11.6647, "cat": "trail" }
+  ],
+  "trailMeta": {
+    "23": {
+      "km": 10.0, "gain": 553, "high": 2517, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 2075,
+      "slug": "trail/italy/south-tyrol/col-raiser-seceda-forcella-pana-rifugio-firenze",
+      "includes": [3],
+      "pois": [[46.6020249,11.7431804],[46.6005922,11.7257836],[46.5987964,11.740451],[46.5875127,11.7583093]]
+    },
+    "24": {
+      "km": 5.5, "gain": 322, "high": 2517, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 996,
+      "slug": "trail/italy/south-tyrol/seceda-malga-pieralongia",
+      "includes": [3],
+      "pois": [[46.6005922,11.7257836],[46.5987964,11.740451]]
+    },
+    "25": {
+      "km": 10.1, "gain": 570, "high": 2517, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 1172,
+      "slug": "trail/italy/south-tyrol/seceda-malga-pieralongia-rifugio-firenze-baita-troier",
+      "includes": [3],
+      "pois": [[46.6005922,11.7257836],[46.5960406,11.7431999],[46.5987964,11.740451],[46.5875127,11.7583093]]
+    },
+    "26": {
+      "km": 11.4, "gain": 597, "high": 2481, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 984,
+      "slug": "trail/italy/veneto/tre-cime-di-lavaredo-laghi-dei-piani",
+      "includes": [11],
+      "pois": [[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6136422,12.3062679],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6386414,12.3154759],[46.6127831,12.2927184],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6389935,12.3082242],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]
+    },
+    "27": {
+      "km": 3.9, "gain": 189, "high": 1582, "diff": "moderate", "type": "loop",
+      "rating": 4.7, "reviews": 2996,
+      "slug": "trail/italy/south-tyrol/lago-di-braies-pragser-wildsee",
+      "includes": [17],
+      "pois": [[46.6888277,12.0878869],[46.6937425,12.084913],[46.7119341,12.0961553],[46.6988558,12.0132509]]
+    },
+    "28": {
+      "km": 5.5, "gain": 18, "high": 2007, "diff": "moderate", "type": "point to point",
+      "rating": 4.7, "reviews": 162,
+      "slug": "trail/italy/south-tyrol/alpe-di-siusi-ortisei",
+      "includes": [18],
+      "pois": [[46.5587949,11.670502],[46.5593872,11.7055514],[46.5577857,11.7276892]]
+    },
+    "29": {
+      "km": 11.6, "gain": 522, "high": 2732, "diff": "moderate", "type": "point to point",
+      "rating": 4.8, "reviews": 22,
+      "slug": "trail/italy/veneto/rifugio-lagazuoi-rifugio-cinque-torri",
+      "includes": [7],
+      "pois": [[46.5095798,12.0519072],[46.5373107,12.0587132],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5304689,12.0216286],[46.5343831,12.0554647],[46.5082178,12.054733],[46.5277379,12.0081182],[46.5323971,12.0699062]]
+    },
+    "30": {
+      "km": 3.5, "gain": 206, "high": 2359, "diff": "moderate", "type": "out & back",
+      "rating": 4.8, "reviews": 2873,
+      "slug": "trail/italy/veneto/rifugio-auronzo-cadini-di-misurina",
+      "includes": [10],
+      "pois": [[46.6024839,12.2976006],[46.6009257,12.2954732],[46.6122047,12.2960952]]
+    },
+    "31": {
+      "km": 4.3, "gain": 173, "high": 1684, "diff": "moderate", "type": "loop",
+      "rating": 4.5, "reviews": 499,
+      "slug": "trail/italy/south-tyrol/lago-di-carezza-lago-di-mezzo",
+      "includes": [14],
+      "pois": [[46.408937,11.5736492],[46.4032417,11.5796126],[46.4101552,11.5759371]]
+    },
+    "32": {
+      "km": 9.5, "gain": 714, "high": 1940, "diff": "hard", "type": "out & back",
+      "rating": 4.7, "reviews": 793,
+      "slug": "trail/italy/veneto/lago-di-sorapis-via-trail-217",
+      "includes": [16],
+      "pois": [[46.5205489,12.2232393],[46.521673,12.2266189]]
+    },
+    "33": {
+      "km": 15.0, "gain": 866, "high": 1937, "diff": "hard", "type": "loop",
+      "rating": 4.6, "reviews": 197,
+      "slug": "trail/italy/veneto/rifugio-cristallo-lago-sorapis-rifugio-vandelli-passo-tre-croci",
+      "includes": [16],
+      "pois": [[46.5205489,12.2232393],[46.521673,12.2266189]]
+    },
+    "34": {
+      "km": 13.0, "gain": 912, "high": 2475, "diff": "hard", "type": "loop",
+      "rating": 4.8, "reviews": 616,
+      "slug": "trail/italy/veneto/croda-da-lago-lago-federa-forcella-ambrizzola",
+      "pois": [[46.4791667,12.0980556],[46.4881988,12.0968015],[46.5067321,12.0887625],[46.4817466,12.0979804],[46.4841642,12.0977551],[46.4833294,12.0974895],[46.4827975,12.0979737],[46.488204,12.1018267],[46.4881011,12.1043606],[46.5016147,12.0536175],[46.4865062,12.1057495],[46.4824521,12.0980018]]
+    },
+    "35": {
+      "km": 10.1, "gain": 493, "high": 2481, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 6212,
+      "slug": "trail/italy/veneto/tre-cime-di-lavaredo-drei-zinnen",
+      "includes": [11, 12],
+      "pois": [[46.6257714,12.2906586],[46.6155893,12.2971773],[46.6193463,12.2811675],[46.6243305,12.3164993],[46.6389935,12.3082242],[46.6136422,12.3062679],[46.6127831,12.2927184],[46.6349134,12.3128689],[46.6207639,12.3083847],[46.6334409,12.3041806],[46.6367684,12.3113042],[46.6333934,12.3134573],[46.6275731,12.3148014],[46.6256608,12.2897944],[46.6122047,12.2960952],[46.6183265,12.3120935],[46.6369346,12.3104843]]
+    },
+    "36": {
+      "km": 12.7, "gain": 598, "high": 1943, "diff": "hard", "type": "out & back",
+      "rating": 4.7, "reviews": 4628,
+      "slug": "trail/italy/veneto/passo-tre-croci-lago-sorapis",
+      "includes": [16],
+      "pois": [[46.5205489,12.2232393],[46.521673,12.2266189]]
+    },
+    "37": {
+      "km": 9.7, "gain": 466, "high": 2037, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 2788,
+      "slug": "trail/italy/south-tyrol/via-delle-odle-zanser-alm-rifugio-delle-odle-malga-dusler",
+      "includes": [19, 20],
+      "pois": [[46.6476368,11.6193826]]
+    },
+    "38": {
+      "km": 2.1, "gain": 118, "high": 2250, "diff": "moderate", "type": "loop",
+      "rating": 4.8, "reviews": 707,
+      "slug": "trail/italy/veneto/giro-cinque-torri",
+      "pois": [[46.5097764,12.0522889],[46.5095798,12.0519072],[46.509674,12.0521257],[46.5090754,12.0518683],[46.5105012,12.0514722],[46.5103332,12.0511933],[46.5106914,12.0509157],[46.5098911,12.0508191],[46.5100785,12.0490605],[46.5082178,12.054733],[46.5080886,12.0467715]]
+    },
+    "39": {
+      "km": 6.9, "gain": 414, "high": 2273, "diff": "moderate", "type": "loop",
+      "rating": 4.6, "reviews": 1216,
+      "slug": "trail/italy/veneto/baita-bai-de-dones-cinque-torri",
+      "pois": [[46.5095798,12.0519072],[46.5090754,12.0518683],[46.5097764,12.0522889],[46.509674,12.0521257],[46.5194816,12.0410153],[46.5105012,12.0514722],[46.5103332,12.0511933],[46.5106914,12.0509157],[46.5098911,12.0508191],[46.5082178,12.054733],[46.5080886,12.0467715]]
+    },
+    "40": {
+      "km": 7.7, "gain": 243, "high": 2019, "diff": "moderate", "type": "loop",
+      "rating": 4.7, "reviews": 873,
+      "slug": "trail/italy/south-tyrol/monte-seuc-piz-schgaguler-schwaige",
+      "includes": [18],
+      "pois": [[46.5587949,11.670502],[46.5581918,11.6539529],[46.5484452,11.6488402]]
+    }
+  },
+  "trip": {
+    "origin": { "name": "Werona", "lat": 45.4384, "lon": 10.9917 },
+    "days": [
+      { "date": "2026-05-12", "accomIdx": 0, "note": "Przyjazd z Werony ~11:00", "max": 2 },
+      { "date": "2026-05-13", "accomIdx": 0, "max": 3 },
+      { "date": "2026-05-14", "accomIdx": 0, "max": 3 },
+      { "date": "2026-05-15", "accomIdx": 1, "max": 3 },
+      { "date": "2026-05-16", "accomIdx": 1, "max": 3 },
+      { "date": "2026-05-17", "accomIdx": 1, "max": 3 },
+      { "date": "2026-05-18", "accomIdx": -1, "note": "Powrót do Werony", "max": 2 }
+    ]
+  }
+}

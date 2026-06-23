@@ -1,0 +1,7 @@
+{
+  "collections": [
+    { "id": "camping-pomorze-2026", "name": "Camping lato 2026" },
+    { "id": "dolomity-2026", "name": "Dolomity 2026" }
+  ],
+  "default": "camping-pomorze-2026"
+}

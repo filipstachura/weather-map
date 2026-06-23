@@ -1,6 +1,6 @@
 {
-  "name": "Dolomity 2026",
-  "short_name": "Dolomity",
+  "name": "Pogoda & Miejsca",
+  "short_name": "Pogoda",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",

@@ -1,0 +1,26 @@
+{
+  "id": "camping-pomorze-2026",
+  "name": "Camping lato 2026",
+  "timezone": "Europe/Warsaw",
+  "categories": {
+    "home": "Baza",
+    "camping": "Camping",
+    "morze": "Morze"
+  },
+  "locations": [
+    { "name": "Gdańsk (dom)", "lat": 54.3520, "lon": 18.6466, "cat": "home" },
+    { "name": "Okoniny Nadjeziorne / Bory Tucholskie", "lat": 53.6873, "lon": 18.0929, "cat": "camping" },
+    { "name": "Swornegacie / Stanica Wodna PTTK", "lat": 53.8731, "lon": 17.5051, "cat": "camping" },
+    { "name": "Lipusz / Domaszk", "lat": 54.0968, "lon": 17.7804, "cat": "camping" },
+    { "name": "Kozia Góra, Żuromino / Jez. Raduńskie", "lat": 54.2318, "lon": 17.9577, "cat": "camping" },
+    { "name": "Sarnówek / Jeziorak", "lat": 53.6584, "lon": 19.5881, "cat": "camping" },
+    { "name": "Lidzbark / Jez. Piaseczno", "lat": 53.2587, "lon": 19.7417, "cat": "camping" },
+    { "name": "Warchały / Binduga 69, Jez. Świętajno", "lat": 53.5508, "lon": 20.7963, "cat": "camping" },
+    { "name": "Elbląg / Camping nr 61", "lat": 54.1531, "lon": 19.3939, "cat": "camping" },
+    { "name": "Camping Maszoperia / Jastarnia (Hel)", "lat": 54.7152, "lon": 18.6342, "cat": "morze" },
+    { "name": "Camping Lazurowe / Chłapowo", "lat": 54.8064, "lon": 18.3840, "cat": "morze" },
+    { "name": "Camping Laguna / Dębki", "lat": 54.8279, "lon": 18.0856, "cat": "morze" },
+    { "name": "Camping Stilo / Sasino", "lat": 54.7823, "lon": 17.7425, "cat": "morze" },
+    { "name": "Camping Leśny 51 / Łeba", "lat": 54.7622, "lon": 17.5656, "cat": "morze" }
+  ]
+}
